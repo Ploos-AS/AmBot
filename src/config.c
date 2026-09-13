@@ -9,6 +9,7 @@ static void copy_value(char *dst, unsigned int size, const char *src)
 {
     unsigned int n;
     if (size == 0) return;
+    if (src == 0) src = "";
     n = (unsigned int)strlen(src);
     if (n >= size) n = size - 1;
     memcpy(dst, src, n);
@@ -42,6 +43,23 @@ void ambot_config_init(struct ambot_config *config)
     copy_value(config->module_dir, sizeof(config->module_dir), "REXX:AmBot/Modules");
 }
 
+void ambot_config_seed(struct ambot_config *config,
+                       const char *host,
+                       unsigned short port,
+                       const char *nick,
+                       const char *user,
+                       const char *pass,
+                       const char *owner)
+{
+    ambot_config_init(config);
+    copy_value(config->host, sizeof(config->host), host);
+    config->port = port != 0 ? port : 6667;
+    copy_value(config->nick, sizeof(config->nick), nick);
+    copy_value(config->user, sizeof(config->user), user != 0 && user[0] != '\0' ? user : nick);
+    copy_value(config->pass, sizeof(config->pass), pass);
+    copy_value(config->owner, sizeof(config->owner), owner);
+}
+
 int ambot_config_load(struct ambot_config *config, const char *path)
 {
     FILE *file;
@@ -67,8 +85,8 @@ int ambot_config_load(struct ambot_config *config, const char *path)
 
         if (key_equal(key, "HOST")) copy_value(config->host, sizeof(config->host), value);
         else if (key_equal(key, "PORT")) {
-            long port = strtol(value, 0, 10);
-            if (port > 0 && port <= 65535) config->port = (unsigned short)port;
+            long parsed_port = strtol(value, 0, 10);
+            if (parsed_port > 0 && parsed_port <= 65535) config->port = (unsigned short)parsed_port;
         }
         else if (key_equal(key, "NICK")) copy_value(config->nick, sizeof(config->nick), value);
         else if (key_equal(key, "USER")) copy_value(config->user, sizeof(config->user), value);
