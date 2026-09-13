@@ -11,7 +11,9 @@
 #include "hooks.h"
 #include "irc.h"
 #include "modules.h"
+#include "multinet.h"
 #include "net.h"
+#include "networks.h"
 #include "operations.h"
 #include "rexx.h"
 #include "session.h"
@@ -61,11 +63,9 @@ static void handle_line(const char *line, void *userdata)
     struct ambot_event event;
 
     printf("< %s\n", line);
-
     if (strncmp(line, "PING ", 5) == 0) {
         char response[AMBOT_IRC_LINE_MAX + 1];
         int written = snprintf(response, sizeof(response), "PONG %s", line + 5);
-
         if (written > 0 && written < (int)sizeof(response)) {
             printf("> %s\n", response);
             (void)ambot_irc_send_line(context->sock, response);
@@ -198,6 +198,65 @@ static void reconnect_delay(unsigned long seconds,
     }
 }
 
+static int run_m7_networks(struct ambot_config *config,
+                           struct ambot_rexx *rexx,
+                           struct ambot_control *control)
+{
+    while (!ctrl_c_requested() && !control->quit_requested) {
+        struct ambot_networks networks;
+        int rc;
+
+        if (ambot_networks_from_config(&networks, config) != 0) {
+            puts("AmBot: no valid networks configured");
+            return 10;
+        }
+        printf("AmBot: M7 networks=%u skipped=%lu\n",
+               (unsigned int)networks.count, networks.skipped);
+
+        control->reload_requested = 0;
+        control->disconnect_requested = 0;
+        control->connect_requested = 1;
+        rc = ambot_multinet_run(&networks, rexx, control);
+
+        if (control->quit_requested || ctrl_c_requested()) break;
+        if (rc == AMBOT_MULTINET_RELOAD) {
+            control->reload_requested = 0;
+            if (config->path[0] == '\0' || ambot_config_load(config, config->path) != 0) {
+                puts("AmBot: M7 config reload failed");
+                return 10;
+            }
+            puts("AmBot: M7 network configuration reloaded");
+            continue;
+        }
+        if (control->disconnect_requested) {
+            control->disconnect_requested = 0;
+            control->connect_requested = 0;
+            while (!control->connect_requested && !control->quit_requested && !ctrl_c_requested()) {
+                ambot_rexx_process(rexx, control);
+                Delay(5);
+            }
+            continue;
+        }
+        if (rc == AMBOT_MULTINET_RECONNECT) {
+            unsigned int ticks = 250;
+            puts("AmBot: all M7 networks offline; reconnecting in 5 seconds");
+            while (ticks > 0 && !control->quit_requested && !ctrl_c_requested()) {
+                ambot_rexx_process(rexx, control);
+                if (control->reload_requested) break;
+                Delay(5);
+                ticks -= 5;
+            }
+            if (control->reload_requested && config->path[0] != '\0') {
+                control->reload_requested = 0;
+                (void)ambot_config_load(config, config->path);
+            }
+            continue;
+        }
+        break;
+    }
+    return 0;
+}
+
 int ambot_session_run(const struct ambot_session_config *startup)
 {
     struct ambot_rexx rexx;
@@ -215,8 +274,8 @@ int ambot_session_run(const struct ambot_session_config *startup)
             return 10;
         }
     }
-    if (config.host[0] == '\0' || config.nick[0] == '\0') {
-        puts("AmBot: config requires HOST and NICK");
+    if (config.network_count == 0 && (config.host[0] == '\0' || config.nick[0] == '\0')) {
+        puts("AmBot: config requires HOST/NICK or at least one NETWORK section");
         return 10;
     }
 
@@ -238,6 +297,15 @@ int ambot_session_run(const struct ambot_session_config *startup)
         puts("AmBot: unable to open bsdsocket.library");
         ambot_rexx_close(&rexx);
         return 20;
+    }
+
+    if (config.network_count != 0 || config.use_ambnc) {
+        int m7_rc = run_m7_networks(&config, &rexx, &control);
+        ambot_control_set_socket(&control, -1);
+        ambot_net_close();
+        ambot_rexx_close(&rexx);
+        puts("AmBot: stopped");
+        return m7_rc;
     }
 
     while (!ctrl_c_requested() && !control.quit_requested) {
