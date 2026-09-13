@@ -16,7 +16,7 @@
 
 #define AMBOT_REXX_SCRIPT_COMMAND_MAX 1024
 
-struct Library *RexxSysBase = 0;
+struct RxsLib *RexxSysBase = 0;
 static char ambot_rexx_port_name[] = AMBOT_REXX_PORT;
 
 static const char *skip_space(const char *p)
@@ -165,25 +165,25 @@ static int dispatch_command(struct ambot_control *control,
 int ambot_rexx_open(struct ambot_rexx *rexx)
 {
     rexx->port = 0;
-    RexxSysBase = OpenLibrary("rexxsyslib.library", 0);
+    RexxSysBase = (struct RxsLib *)OpenLibrary((STRPTR)"rexxsyslib.library", 0);
     if (RexxSysBase == 0) return -1;
 
     rexx->port = CreateMsgPort();
     if (rexx->port == 0) {
-        CloseLibrary(RexxSysBase);
+        CloseLibrary((struct Library *)RexxSysBase);
         RexxSysBase = 0;
         return -1;
     }
 
-    rexx->port->mp_Node.ln_Name = ambot_rexx_port_name;
+    rexx->port->mp_Node.ln_Name = (char *)ambot_rexx_port_name;
     rexx->port->mp_Node.ln_Pri = 0;
 
     Forbid();
-    if (FindPort(ambot_rexx_port_name) != 0) {
+    if (FindPort((STRPTR)ambot_rexx_port_name) != 0) {
         Permit();
         DeleteMsgPort(rexx->port);
         rexx->port = 0;
-        CloseLibrary(RexxSysBase);
+        CloseLibrary((struct Library *)RexxSysBase);
         RexxSysBase = 0;
         return -1;
     }
@@ -204,7 +204,7 @@ void ambot_rexx_close(struct ambot_rexx *rexx)
         rexx->port = 0;
     }
     if (RexxSysBase != 0) {
-        CloseLibrary(RexxSysBase);
+        CloseLibrary((struct Library *)RexxSysBase);
         RexxSysBase = 0;
     }
 }
@@ -221,13 +221,13 @@ void ambot_rexx_process(struct ambot_rexx *rexx, struct ambot_control *control)
 
     while (rexx->port != 0 && (message = (struct RexxMsg *)GetMsg(rexx->port)) != 0) {
         char result[AMBOT_OPERATION_RESULT_MAX];
-        const char *input = message->rm_Args[0] != 0 ? message->rm_Args[0] : "";
+        const char *input = message->rm_Args[0] != 0 ? (const char *)message->rm_Args[0] : "";
         int rc = dispatch_command(control, input, result, sizeof(result));
 
         message->rm_Result1 = rc;
         message->rm_Result2 = 0;
         if ((message->rm_Action & RXFF_RESULT) != 0) {
-            message->rm_Result2 = (LONG)CreateArgstring(result, (LONG)strlen(result));
+            message->rm_Result2 = (LONG)CreateArgstring((UBYTE *)result, (LONG)strlen(result));
         }
         ReplyMsg((struct Message *)message);
     }
@@ -253,13 +253,13 @@ int ambot_rexx_run_script(struct ambot_rexx *rexx,
 
     if (RexxSysBase == 0 || script_path == 0) return 20;
 
-    master = FindPort("REXX");
+    master = FindPort((STRPTR)"REXX");
     if (master == 0) return 20;
 
     reply = CreateMsgPort();
     if (reply == 0) return 20;
 
-    message = CreateRexxMsg(reply, (STRPTR)".ambot", (STRPTR)AMBOT_REXX_PORT);
+    message = CreateRexxMsg(reply, (UBYTE *)".ambot", (UBYTE *)AMBOT_REXX_PORT);
     if (message == 0) {
         DeleteMsgPort(reply);
         return 20;
@@ -276,7 +276,7 @@ int ambot_rexx_run_script(struct ambot_rexx *rexx,
         return 10;
     }
 
-    message->rm_Args[0] = CreateArgstring(command, (LONG)strlen(command));
+    message->rm_Args[0] = CreateArgstring((UBYTE *)command, (LONG)strlen(command));
     if (message->rm_Args[0] == 0) {
         DeleteRexxMsg(message);
         DeleteMsgPort(reply);
@@ -296,7 +296,7 @@ int ambot_rexx_run_script(struct ambot_rexx *rexx,
 
     rc = message->rm_Result1;
     DeleteArgstring(message->rm_Args[0]);
-    if (message->rm_Result2 != 0) DeleteArgstring((STRPTR)message->rm_Result2);
+    if (message->rm_Result2 != 0) DeleteArgstring((UBYTE *)message->rm_Result2);
     DeleteRexxMsg(message);
     DeleteMsgPort(reply);
     return (int)rc;
