@@ -35,6 +35,12 @@ static int key_equal(const char *a, const char *b)
     return *a == '\0' && *b == '\0';
 }
 
+static int enabled(const char *value)
+{
+    return key_equal(value, "ON") || key_equal(value, "YES") ||
+           key_equal(value, "TRUE") || strcmp(value, "1") == 0;
+}
+
 static unsigned short parse_port(const char *value, unsigned short fallback)
 {
     long parsed = strtol(value, 0, 10);
@@ -55,6 +61,11 @@ static void network_defaults(struct ambot_config_network *network,
     copy_value(network->module_dir, sizeof(network->module_dir), config->module_dir);
     copy_value(network->ambnc_host, sizeof(network->ambnc_host), config->ambnc_host);
     network->use_ambnc = config->use_ambnc;
+    network->cap_enabled = config->cap_enabled;
+    network->sasl_plain = config->sasl_plain;
+    copy_value(network->sasl_user, sizeof(network->sasl_user), config->sasl_user);
+    copy_value(network->sasl_pass, sizeof(network->sasl_pass), config->sasl_pass);
+    network->tls_upstream = config->tls_upstream;
 }
 
 void ambot_config_init(struct ambot_config *config)
@@ -62,6 +73,7 @@ void ambot_config_init(struct ambot_config *config)
     memset(config, 0, sizeof(*config));
     config->port = 6667;
     config->ambnc_port = 6667;
+    config->cap_enabled = 1;
     copy_value(config->hook_dir, sizeof(config->hook_dir), "REXX:AmBot");
     copy_value(config->module_dir, sizeof(config->module_dir), "REXX:AmBot/Modules");
 }
@@ -98,6 +110,11 @@ static void apply_network_key(struct ambot_config_network *network,
     else if (key_equal(key, "UPSTREAM")) network->use_ambnc = key_equal(value, "AMBNC") ? 1 : 0;
     else if (key_equal(key, "AMBNC_HOST")) copy_value(network->ambnc_host, sizeof(network->ambnc_host), value);
     else if (key_equal(key, "AMBNC_PORT")) network->ambnc_port = parse_port(value, network->ambnc_port);
+    else if (key_equal(key, "CAP")) network->cap_enabled = enabled(value) ? 1 : 0;
+    else if (key_equal(key, "SASL")) network->sasl_plain = key_equal(value, "PLAIN") ? 1 : 0;
+    else if (key_equal(key, "SASL_USER")) copy_value(network->sasl_user, sizeof(network->sasl_user), value);
+    else if (key_equal(key, "SASL_PASS")) copy_value(network->sasl_pass, sizeof(network->sasl_pass), value);
+    else if (key_equal(key, "TLS")) network->tls_upstream = key_equal(value, "UPSTREAM") ? 1 : 0;
     else if (key_equal(key, "CHANNEL") && network->channel_count < AMBOT_CONFIG_CHANNELS_MAX) {
         copy_value(network->channels[network->channel_count], sizeof(network->channels[0]), value);
         ++network->channel_count;
@@ -166,6 +183,11 @@ int ambot_config_load(struct ambot_config *config, const char *path)
         else if (key_equal(key, "UPSTREAM")) config->use_ambnc = key_equal(value, "AMBNC") ? 1 : 0;
         else if (key_equal(key, "AMBNC_HOST")) copy_value(config->ambnc_host, sizeof(config->ambnc_host), value);
         else if (key_equal(key, "AMBNC_PORT")) config->ambnc_port = parse_port(value, config->ambnc_port);
+        else if (key_equal(key, "CAP")) config->cap_enabled = enabled(value) ? 1 : 0;
+        else if (key_equal(key, "SASL")) config->sasl_plain = key_equal(value, "PLAIN") ? 1 : 0;
+        else if (key_equal(key, "SASL_USER")) copy_value(config->sasl_user, sizeof(config->sasl_user), value);
+        else if (key_equal(key, "SASL_PASS")) copy_value(config->sasl_pass, sizeof(config->sasl_pass), value);
+        else if (key_equal(key, "TLS")) config->tls_upstream = key_equal(value, "UPSTREAM") ? 1 : 0;
         else if (key_equal(key, "CHANNEL") && config->channel_count < AMBOT_CONFIG_CHANNELS_MAX) {
             copy_value(config->channels[config->channel_count], sizeof(config->channels[0]), value);
             ++config->channel_count;
