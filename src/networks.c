@@ -33,6 +33,11 @@ static void copy_network(struct ambot_network_config *dst,
     dst->upstream = src->use_ambnc ? AMBOT_UPSTREAM_AMBNC : AMBOT_UPSTREAM_DIRECT;
     copy_value(dst->ambnc_host, sizeof(dst->ambnc_host), src->ambnc_host);
     dst->ambnc_port = src->ambnc_port;
+    dst->cap_enabled = src->cap_enabled;
+    dst->sasl_plain = src->sasl_plain;
+    copy_value(dst->sasl_user, sizeof(dst->sasl_user), src->sasl_user);
+    copy_value(dst->sasl_pass, sizeof(dst->sasl_pass), src->sasl_pass);
+    dst->tls_upstream = src->tls_upstream;
 }
 
 void ambot_networks_init(struct ambot_networks *networks)
@@ -51,6 +56,8 @@ int ambot_networks_from_config(struct ambot_networks *networks,
             copy_network(&networks->items[i], &config->networks[i]);
         networks->count = config->network_count > AMBOT_NETWORKS_MAX ? AMBOT_NETWORKS_MAX : config->network_count;
         networks->skipped = config->networks_skipped;
+        for (i = 0; i < networks->count; ++i)
+            if (ambot_network_validate_security(&networks->items[i]) != 0) return -1;
         return networks->count != 0 ? 0 : -1;
     }
 
@@ -73,10 +80,15 @@ int ambot_networks_from_config(struct ambot_networks *networks,
         legacy.use_ambnc = config->use_ambnc;
         copy_value(legacy.ambnc_host, sizeof(legacy.ambnc_host), config->ambnc_host);
         legacy.ambnc_port = config->ambnc_port;
+        legacy.cap_enabled = config->cap_enabled;
+        legacy.sasl_plain = config->sasl_plain;
+        copy_value(legacy.sasl_user, sizeof(legacy.sasl_user), config->sasl_user);
+        copy_value(legacy.sasl_pass, sizeof(legacy.sasl_pass), config->sasl_pass);
+        legacy.tls_upstream = config->tls_upstream;
         copy_network(&networks->items[0], &legacy);
         networks->count = 1;
     }
-    return 0;
+    return ambot_network_validate_security(&networks->items[0]);
 }
 
 const char *ambot_network_endpoint_host(const struct ambot_network_config *network)
@@ -91,4 +103,11 @@ unsigned short ambot_network_endpoint_port(const struct ambot_network_config *ne
     if (network->upstream == AMBOT_UPSTREAM_AMBNC && network->ambnc_port != 0)
         return network->ambnc_port;
     return network->port;
+}
+
+int ambot_network_validate_security(const struct ambot_network_config *network)
+{
+    if (network->tls_upstream && network->upstream != AMBOT_UPSTREAM_AMBNC) return -1;
+    if (network->sasl_plain && (network->sasl_user[0] == '\0' || network->sasl_pass[0] == '\0')) return -1;
+    return 0;
 }
