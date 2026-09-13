@@ -28,6 +28,8 @@ struct network_runtime {
     struct ambot_modernirc modern;
 };
 
+static struct network_runtime multinet_runtimes[AMBOT_NETWORKS_MAX];
+
 struct line_context {
     struct network_runtime *runtime;
 };
@@ -123,12 +125,12 @@ int ambot_multinet_run(struct ambot_networks *networks,
                        struct ambot_rexx *rexx,
                        struct ambot_control *control)
 {
-    struct network_runtime runtimes[AMBOT_NETWORKS_MAX];
+    struct network_runtime *runtimes = multinet_runtimes;
     int sockets[AMBOT_NETWORKS_MAX];
     unsigned int i;
     unsigned int active = 0;
 
-    memset(runtimes, 0, sizeof(runtimes));
+    memset(runtimes, 0, sizeof(multinet_runtimes));
     for (i = 0; i < networks->count; ++i) {
         runtimes[i].config = &networks->items[i];
         runtimes[i].sock = -1;
