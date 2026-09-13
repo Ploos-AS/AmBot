@@ -39,11 +39,14 @@ Runtime qualification remains separate; see `docs/M2.md`.
 
 Runtime qualification remains separate; see `docs/M3.md`.
 
-## M4 — ARexx command API
+## M4 — ARexx command API — IMPLEMENTED
 
 - live `AMBOT` message port
 - STATUS, CONNECT, DISCONNECT, JOIN, PART, MSG, NOTICE, ACTION, WHOIS, MODE, TOPIC, RAW, RELOAD, QUIT
 - shared internal operations used by native and ARexx callers
+- ARexx and IRC socket activity integrated in one runtime loop with `WaitSelect()`
+
+`RELOAD` is reserved and returns RC 5 until the configuration milestone. Runtime qualification remains separate; see `docs/M4.md`.
 
 ## M5 — ARexx event automation
 
