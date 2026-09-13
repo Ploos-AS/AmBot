@@ -26,6 +26,11 @@ struct ambot_network_config {
     enum ambot_upstream_type upstream;
     char ambnc_host[AMBOT_CONFIG_HOST_MAX + 1];
     unsigned short ambnc_port;
+    unsigned char cap_enabled;
+    unsigned char sasl_plain;
+    char sasl_user[AMBOT_CONFIG_USER_MAX + 1];
+    char sasl_pass[AMBOT_CONFIG_PASS_MAX + 1];
+    unsigned char tls_upstream;
 };
 
 struct ambot_networks {
@@ -39,5 +44,6 @@ int ambot_networks_from_config(struct ambot_networks *networks,
                                const struct ambot_config *config);
 const char *ambot_network_endpoint_host(const struct ambot_network_config *network);
 unsigned short ambot_network_endpoint_port(const struct ambot_network_config *network);
+int ambot_network_validate_security(const struct ambot_network_config *network);
 
 #endif
