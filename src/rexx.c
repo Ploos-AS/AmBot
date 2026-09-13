@@ -115,6 +115,8 @@ static int dispatch_command(struct ambot_control *control,
         return ambot_operation_connect(control, result, size);
     if (strcmp(command, "DISCONNECT") == 0)
         return ambot_operation_disconnect(control, result, size);
+    if (strcmp(command, "RELOAD") == 0)
+        return ambot_operation_reload(control, result, size);
     if (strcmp(command, "QUIT") == 0)
         return ambot_operation_quit(control, result, size);
     if (strcmp(command, "RAW") == 0)
@@ -154,10 +156,6 @@ static int dispatch_command(struct ambot_control *control,
             return 10;
         }
         return ambot_operation_send_raw(control, payload, result, size);
-    }
-    if (strcmp(command, "RELOAD") == 0) {
-        snprintf(result, size, "RELOAD DEFERRED UNTIL CONFIG MILESTONE");
-        return 5;
     }
 
     snprintf(result, size, "UNKNOWN COMMAND");
