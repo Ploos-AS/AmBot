@@ -134,6 +134,8 @@ const char *ambot_event_type_name(enum ambot_event_type type)
     case AMBOT_EVENT_KICK: return "KICK";
     case AMBOT_EVENT_TOPIC: return "TOPIC";
     case AMBOT_EVENT_NICK: return "NICK";
+    case AMBOT_EVENT_CONNECT: return "CONNECT";
+    case AMBOT_EVENT_DISCONNECT: return "DISCONNECT";
     default: return "NONE";
     }
 }
