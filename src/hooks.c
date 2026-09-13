@@ -32,9 +32,13 @@ static int script_exists(const char *path)
     return 1;
 }
 
-void ambot_hooks_init(struct ambot_hook_context *context)
+void ambot_hooks_init(struct ambot_hook_context *context,
+                      struct ambot_rexx *rexx,
+                      struct ambot_control *control)
 {
     context->script_dir = AMBOT_HOOK_SCRIPT_DIR;
+    context->rexx = rexx;
+    context->control = control;
     context->invoked = 0;
     context->failed = 0;
 }
@@ -54,7 +58,9 @@ void ambot_hooks_dispatch_event(const struct ambot_event *event, void *userdata)
     if (!script_exists(path)) return;
 
     ++context->invoked;
-    rc = ambot_rexx_run_script(path,
+    rc = ambot_rexx_run_script(context->rexx,
+                               context->control,
+                               path,
                                ambot_event_type_name(event->type),
                                event->nick,
                                event->target,
