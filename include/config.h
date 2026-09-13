@@ -27,6 +27,11 @@ struct ambot_config_network {
     unsigned char use_ambnc;
     char ambnc_host[AMBOT_CONFIG_HOST_MAX + 1];
     unsigned short ambnc_port;
+    unsigned char cap_enabled;
+    unsigned char sasl_plain;
+    char sasl_user[AMBOT_CONFIG_USER_MAX + 1];
+    char sasl_pass[AMBOT_CONFIG_PASS_MAX + 1];
+    unsigned char tls_upstream;
 };
 
 struct ambot_config {
@@ -44,6 +49,11 @@ struct ambot_config {
     unsigned char use_ambnc;
     char ambnc_host[AMBOT_CONFIG_HOST_MAX + 1];
     unsigned short ambnc_port;
+    unsigned char cap_enabled;
+    unsigned char sasl_plain;
+    char sasl_user[AMBOT_CONFIG_USER_MAX + 1];
+    char sasl_pass[AMBOT_CONFIG_PASS_MAX + 1];
+    unsigned char tls_upstream;
     struct ambot_config_network networks[AMBOT_CONFIG_NETWORKS_MAX];
     unsigned char network_count;
     unsigned long networks_skipped;
