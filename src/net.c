@@ -16,7 +16,7 @@ struct Library *SocketBase = 0;
 int ambot_net_open(void)
 {
     if (SocketBase != 0) return 0;
-    SocketBase = OpenLibrary("bsdsocket.library", 0);
+    SocketBase = OpenLibrary((STRPTR)"bsdsocket.library", 0);
     return SocketBase != 0 ? 0 : -1;
 }
 
@@ -34,7 +34,7 @@ int ambot_net_connect_ipv4(const char *host, unsigned short port)
     struct sockaddr_in address;
     int sock;
 
-    resolved = gethostbyname(host);
+    resolved = gethostbyname((STRPTR)host);
     if (resolved == 0 || resolved->h_addr_list == 0 || resolved->h_addr_list[0] == 0)
         return -1;
 
@@ -57,7 +57,7 @@ int ambot_net_send_all(int sock, const char *data, unsigned int length)
 {
     unsigned int sent = 0;
     while (sent < length) {
-        int rc = send(sock, data + sent, length - sent, 0);
+        int rc = send(sock, (STRPTR)(data + sent), length - sent, 0);
         if (rc <= 0) return -1;
         sent += (unsigned int)rc;
     }
