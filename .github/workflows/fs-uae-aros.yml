@@ -25,10 +25,10 @@ jobs:
         run: make check
 
       - name: Gate 1 - native Bebbo AmBot build
-        run: ci/fs-uae/build-native.sh
+        run: bash ci/fs-uae/build-native.sh
 
       - name: Gate 2 - execute AmBot inside AROS guest
-        run: ci/fs-uae/run-aros-guest-smoke.sh
+        run: bash ci/fs-uae/run-aros-guest-smoke.sh
 
       - name: Upload qualification evidence
         if: always()
