@@ -4,7 +4,7 @@ OUT_DIR="${1:-build/fs-uae/aros-guest}"
 SYSTEM_DIR="build/fs-uae/aros-system"
 mkdir -p "$OUT_DIR"
 if [[ ! -f build/fs-uae/native/AmBot ]]; then echo 'ERROR: native AmBot binary missing' >&2; exit 1; fi
-iso="$(ci/fs-uae/fetch-aros-system.sh "$SYSTEM_DIR" | tail -n 1)"
+iso="$(bash ci/fs-uae/fetch-aros-system.sh "$SYSTEM_DIR" | tail -n 1)"
 root_extract="$OUT_DIR/system-root"
 rm -rf "$root_extract"; mkdir -p "$root_extract"
 7z x -y -o"$root_extract" "$iso" >/dev/null
