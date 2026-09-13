@@ -7,6 +7,7 @@
 #include "events.h"
 #include "hooks.h"
 #include "irc.h"
+#include "modernirc.h"
 #include "modules.h"
 #include "multinet.h"
 #include "net.h"
@@ -24,6 +25,7 @@ struct network_runtime {
     struct ambot_command_context commands;
     struct ambot_hook_context hooks;
     struct ambot_modules modules;
+    struct ambot_modernirc modern;
 };
 
 struct line_context {
@@ -44,6 +46,9 @@ static void handle_line(const char *line, void *userdata)
     struct ambot_event event;
 
     printf("[%s] < %s\n", runtime->config->name, line);
+    (void)ambot_modernirc_handle_line(runtime->sock, runtime->config,
+                                      &runtime->modern, line);
+
     if (strncmp(line, "PING ", 5) == 0) {
         char response[AMBOT_IRC_LINE_MAX + 1];
         int written = snprintf(response, sizeof(response), "PONG %s", line + 5);
@@ -67,6 +72,11 @@ static int connect_runtime(struct network_runtime *runtime,
     unsigned short port = ambot_network_endpoint_port(config);
     unsigned int i;
 
+    if (ambot_network_validate_security(config) != 0) {
+        printf("AmBot: invalid security profile for network %s\n", config->name);
+        return -1;
+    }
+
     runtime->sock = ambot_net_connect_ipv4(host, port);
     if (runtime->sock < 0) return -1;
 
@@ -79,8 +89,10 @@ static int connect_runtime(struct network_runtime *runtime,
     runtime->hooks.script_dir = config->hook_dir;
     ambot_modules_init(&runtime->modules);
     (void)ambot_modules_discover(&runtime->modules, config->module_dir);
+    ambot_modernirc_init(&runtime->modern);
 
-    if (ambot_irc_send_registration(runtime->sock,
+    if (ambot_modernirc_start(runtime->sock, config, &runtime->modern) != 0 ||
+        ambot_irc_send_registration(runtime->sock,
                                     config->nick,
                                     config->user,
                                     config->pass[0] != '\0' ? config->pass : 0) != 0) {
@@ -96,11 +108,14 @@ static int connect_runtime(struct network_runtime *runtime,
             (void)ambot_irc_send_line(runtime->sock, line);
     }
 
-    printf("AmBot: network %s connected via %s:%u%s\n",
+    printf("AmBot: network %s connected via %s:%u%s CAP=%s SASL=%s TLS=%s\n",
            config->name,
            host,
            (unsigned int)port,
-           config->upstream == AMBOT_UPSTREAM_AMBNC ? " (AmBNC)" : "");
+           config->upstream == AMBOT_UPSTREAM_AMBNC ? " (AmBNC)" : "",
+           config->cap_enabled ? "on" : "off",
+           config->sasl_plain ? "PLAIN" : "off",
+           config->tls_upstream ? "upstream" : "off");
     return 0;
 }
 
