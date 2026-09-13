@@ -46,7 +46,7 @@ Runtime qualification remains separate; see `docs/M3.md`.
 - shared internal operations used by native and ARexx callers
 - ARexx and IRC socket activity integrated in one runtime loop with `WaitSelect()`
 
-`RELOAD` is reserved and returns RC 5 until the configuration milestone. Runtime qualification remains separate; see `docs/M4.md`.
+Runtime qualification remains separate; see `docs/M4.md`.
 
 ## M5 — ARexx event automation — IMPLEMENTED
 
@@ -58,12 +58,16 @@ Runtime qualification remains separate; see `docs/M3.md`.
 
 Runtime qualification remains separate; see `docs/M5.md`.
 
-## M6 — Persistence and modules
+## M6 — Persistence and modules — IMPLEMENTED
 
-- configuration file
-- persistent channel/network settings
-- script/module discovery
-- bounded per-module state where practical
+- persistent configuration file
+- up to 16 persistent channel entries with auto-join
+- configurable hook and module directories
+- live ARexx `RELOAD`
+- discovery of up to 16 ARexx modules
+- bounded per-module state
+
+Runtime qualification remains separate; see `docs/M6.md`.
 
 ## M7 — Multiple networks and AmBNC integration
 
