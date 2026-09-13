@@ -20,12 +20,14 @@
 
 Runtime qualification on classic Amiga/FS-UAE remains a separate qualification step; implementation is present in `main`.
 
-## M2 — Event engine
+## M2 — Event engine — IMPLEMENTED
 
 - normalized IRC event model
 - PRIVMSG/NOTICE/JOIN/PART/QUIT/KICK/TOPIC/NICK events
 - shared dispatcher for built-ins and automation
 - bounded event queue
+
+Runtime qualification remains separate; see `docs/M2.md`.
 
 ## M3 — Bot commands
 
