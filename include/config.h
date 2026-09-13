@@ -25,6 +25,13 @@ struct ambot_config {
 };
 
 void ambot_config_init(struct ambot_config *config);
+void ambot_config_seed(struct ambot_config *config,
+                       const char *host,
+                       unsigned short port,
+                       const char *nick,
+                       const char *user,
+                       const char *pass,
+                       const char *owner);
 int ambot_config_load(struct ambot_config *config, const char *path);
 
 #endif
