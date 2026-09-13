@@ -1,9 +1,11 @@
 #include <string.h>
 
 #include <exec/libraries.h>
+#include <exec/types.h>
 #include <proto/exec.h>
 #include <proto/bsdsocket.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <netdb.h>
 
@@ -76,6 +78,21 @@ int ambot_net_send_all(int sock, const char *data, unsigned int length)
 int ambot_net_recv(int sock, char *buffer, unsigned int length)
 {
     return recv(sock, buffer, length, 0);
+}
+
+int ambot_net_wait(int sock, unsigned long signal_mask, unsigned long *signals)
+{
+    fd_set readfds;
+    ULONG signal_bits = (ULONG)signal_mask;
+    int rc;
+
+    FD_ZERO(&readfds);
+    FD_SET(sock, &readfds);
+
+    rc = WaitSelect(sock + 1, &readfds, 0, 0, 0, &signal_bits);
+    if (signals != 0) *signals = (unsigned long)signal_bits;
+    if (rc < 0) return -1;
+    return FD_ISSET(sock, &readfds) ? 1 : 0;
 }
 
 void ambot_net_close_socket(int sock)
