@@ -8,6 +8,7 @@ struct ambot_session_config {
     const char *user;
     const char *pass;
     const char *owner_nick;
+    const char *config_path;
 };
 
 int ambot_session_run(const struct ambot_session_config *config);
