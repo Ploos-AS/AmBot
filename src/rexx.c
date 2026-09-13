@@ -235,7 +235,9 @@ void ambot_rexx_process(struct ambot_rexx *rexx, struct ambot_control *control)
     }
 }
 
-int ambot_rexx_run_script(const char *script_path,
+int ambot_rexx_run_script(struct ambot_rexx *rexx,
+                          struct ambot_control *control,
+                          const char *script_path,
                           const char *event_name,
                           const char *nick,
                           const char *target,
@@ -246,6 +248,9 @@ int ambot_rexx_run_script(const char *script_path,
     struct RexxMsg *message;
     char command[AMBOT_REXX_SCRIPT_COMMAND_MAX];
     unsigned int length = 0;
+    unsigned long reply_mask;
+    unsigned long ambot_mask;
+    int done = 0;
     LONG rc;
 
     if (RexxSysBase == 0 || script_path == 0) return 20;
@@ -282,10 +287,16 @@ int ambot_rexx_run_script(const char *script_path,
     message->rm_Action = RXCOMM | RXFF_RESULT;
 
     PutMsg(master, (struct Message *)message);
-    WaitPort(reply);
-    (void)GetMsg(reply);
-    rc = message->rm_Result1;
+    reply_mask = 1UL << reply->mp_SigBit;
+    ambot_mask = ambot_rexx_signal_mask(rexx);
 
+    while (!done) {
+        unsigned long signals = Wait(reply_mask | ambot_mask);
+        if ((signals & ambot_mask) != 0) ambot_rexx_process(rexx, control);
+        if ((signals & reply_mask) != 0 && GetMsg(reply) != 0) done = 1;
+    }
+
+    rc = message->rm_Result1;
     DeleteArgstring(message->rm_Args[0]);
     if (message->rm_Result2 != 0) DeleteArgstring((STRPTR)message->rm_Result2);
     DeleteRexxMsg(message);
