@@ -15,7 +15,9 @@ enum ambot_event_type {
     AMBOT_EVENT_QUIT,
     AMBOT_EVENT_KICK,
     AMBOT_EVENT_TOPIC,
-    AMBOT_EVENT_NICK
+    AMBOT_EVENT_NICK,
+    AMBOT_EVENT_CONNECT,
+    AMBOT_EVENT_DISCONNECT
 };
 
 struct ambot_event {
