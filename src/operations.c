@@ -28,10 +28,11 @@ void ambot_control_set_socket(struct ambot_control *control, int sock)
 
 int ambot_operation_status(const struct ambot_control *control, char *result, unsigned int size)
 {
-    snprintf(result, size, "CONNECTED=%u CONNECT_REQUESTED=%u DISCONNECT_REQUESTED=%u QUIT_REQUESTED=%u",
+    snprintf(result, size, "CONNECTED=%u CONNECT_REQUESTED=%u DISCONNECT_REQUESTED=%u RELOAD_REQUESTED=%u QUIT_REQUESTED=%u",
              (unsigned int)control->connected,
              (unsigned int)control->connect_requested,
              (unsigned int)control->disconnect_requested,
+             (unsigned int)control->reload_requested,
              (unsigned int)control->quit_requested);
     return 0;
 }
@@ -53,6 +54,13 @@ int ambot_operation_disconnect(struct ambot_control *control, char *result, unsi
     control->disconnect_requested = 1;
     control->connect_requested = 0;
     set_result(result, size, control->connected ? "DISCONNECT REQUESTED" : "DISCONNECTED");
+    return 0;
+}
+
+int ambot_operation_reload(struct ambot_control *control, char *result, unsigned int size)
+{
+    control->reload_requested = 1;
+    set_result(result, size, "RELOAD REQUESTED");
     return 0;
 }
 
