@@ -69,11 +69,17 @@ Runtime qualification remains separate; see `docs/M5.md`.
 
 Runtime qualification remains separate; see `docs/M6.md`.
 
-## M7 — Multiple networks and AmBNC integration
+## M7 — Multiple networks and AmBNC integration — IMPLEMENTED
 
-- multiple IRC networks
-- optional connection through AmBNC
-- per-network command/script configuration
+- up to four simultaneous IRC networks
+- one `WaitSelect()` loop services all active sockets
+- optional per-network connection through AmBNC
+- per-network channels, command context, hook directory and module directory
+- partial network failure does not stop remaining networks
+- live `RELOAD` rebuilds the multi-network set
+- M6 single-network configuration remains compatible
+
+Runtime qualification remains separate; see `docs/M7.md`.
 
 ## M8 — Modern IRC extensions
 
