@@ -81,11 +81,15 @@ Runtime qualification remains separate; see `docs/M6.md`.
 
 Runtime qualification remains separate; see `docs/M7.md`.
 
-## M8 — Modern IRC extensions
+## M8 — Modern IRC extensions — IMPLEMENTED
 
-- CAP negotiation
-- SASL where feasible
-- TLS strategy appropriate for classic Amiga hardware
+- IRCv3 `CAP LS 302` negotiation per network
+- SASL PLAIN negotiation and bounded base64 payload generation
+- per-network CAP/SASL configuration
+- TLS termination strategy through AmBNC/upstream proxy
+- security-profile validation for `TLS=UPSTREAM`
+
+Runtime qualification remains separate; see `docs/M8.md`.
 
 ## M9 — Qualification and release
 
