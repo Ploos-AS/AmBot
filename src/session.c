@@ -5,6 +5,7 @@
 #include <proto/dos.h>
 #include <proto/exec.h>
 
+#include "commands.h"
 #include "events.h"
 #include "irc.h"
 #include "net.h"
@@ -21,16 +22,6 @@ struct line_context {
 static int ctrl_c_requested(void)
 {
     return (SetSignal(0L, 0L) & SIGBREAKF_CTRL_C) != 0;
-}
-
-static void print_event(const struct ambot_event *event, void *userdata)
-{
-    (void)userdata;
-    printf("event %-7s nick=%s target=%s text=%s\n",
-           ambot_event_type_name(event->type),
-           event->nick,
-           event->target,
-           event->text);
 }
 
 static void handle_line(const char *line, void *userdata)
@@ -62,11 +53,16 @@ static int run_connected_session(const struct ambot_session_config *config, int 
 {
     struct ambot_irc_framer framer;
     struct ambot_event_queue events;
+    struct ambot_command_context commands;
     struct line_context context;
     char buffer[AMBOT_RECV_BUFFER];
 
     context.sock = sock;
     context.events = &events;
+    commands.sock = sock;
+    commands.bot_nick = config->nick;
+    commands.owner_nick = config->owner_nick;
+
     ambot_irc_framer_init(&framer);
     ambot_event_queue_init(&events);
 
@@ -88,7 +84,7 @@ static int run_connected_session(const struct ambot_session_config *config, int 
                               (unsigned int)received,
                               handle_line,
                               &context);
-        ambot_event_dispatch_pending(&events, print_event, 0);
+        ambot_event_dispatch_pending(&events, ambot_commands_handle_event, &commands);
     }
 
     return 0;
