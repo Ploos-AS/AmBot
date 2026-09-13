@@ -1,6 +1,6 @@
 # AmBot Roadmap
 
-## M0 — Foundation
+## M0 — Foundation — COMPLETE
 
 - Repository and licensing baseline
 - AmigaOS 2.04+ / 68000 target documented
@@ -9,7 +9,7 @@
 - ARexx port name fixed as `AMBOT`
 - Minimal native executable skeleton
 
-## M1 — IRC session
+## M1 — IRC session — IMPLEMENTED
 
 - `bsdsocket.library` adapter
 - TCP connect/disconnect
@@ -17,6 +17,8 @@
 - PASS/NICK/USER registration
 - PING/PONG
 - reconnect with bounded backoff
+
+Runtime qualification on classic Amiga/FS-UAE remains a separate qualification step; implementation is present in `main`.
 
 ## M2 — Event engine
 
