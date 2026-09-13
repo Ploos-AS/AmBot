@@ -7,6 +7,7 @@
 
 #include "commands.h"
 #include "events.h"
+#include "hooks.h"
 #include "irc.h"
 #include "net.h"
 #include "operations.h"
@@ -21,9 +22,35 @@ struct line_context {
     struct ambot_event_queue *events;
 };
 
+struct dispatch_context {
+    struct ambot_command_context *commands;
+    struct ambot_hook_context *hooks;
+};
+
 static int ctrl_c_requested(void)
 {
     return (SetSignal(0L, 0L) & SIGBREAKF_CTRL_C) != 0;
+}
+
+static void dispatch_event(const struct ambot_event *event, void *userdata)
+{
+    struct dispatch_context *context = (struct dispatch_context *)userdata;
+    ambot_commands_handle_event(event, context->commands);
+    ambot_hooks_dispatch_event(event, context->hooks);
+}
+
+static void emit_lifecycle(struct ambot_hook_context *hooks,
+                           enum ambot_event_type type,
+                           const struct ambot_session_config *config,
+                           const char *reason)
+{
+    struct ambot_event event;
+    memset(&event, 0, sizeof(event));
+    event.type = type;
+    snprintf(event.nick, sizeof(event.nick), "%s", config->nick);
+    snprintf(event.target, sizeof(event.target), "%s", config->host);
+    snprintf(event.text, sizeof(event.text), "%s", reason != 0 ? reason : "");
+    ambot_hooks_dispatch_event(&event, hooks);
 }
 
 static void handle_line(const char *line, void *userdata)
@@ -54,11 +81,13 @@ static void handle_line(const char *line, void *userdata)
 static int run_connected_session(const struct ambot_session_config *config,
                                  int sock,
                                  struct ambot_rexx *rexx,
-                                 struct ambot_control *control)
+                                 struct ambot_control *control,
+                                 struct ambot_hook_context *hooks)
 {
     struct ambot_irc_framer framer;
     struct ambot_event_queue events;
     struct ambot_command_context commands;
+    struct dispatch_context dispatch;
     struct line_context context;
     char buffer[AMBOT_RECV_BUFFER];
 
@@ -67,6 +96,8 @@ static int run_connected_session(const struct ambot_session_config *config,
     commands.sock = sock;
     commands.bot_nick = config->nick;
     commands.owner_nick = config->owner_nick;
+    dispatch.commands = &commands;
+    dispatch.hooks = hooks;
 
     ambot_irc_framer_init(&framer);
     ambot_event_queue_init(&events);
@@ -110,7 +141,7 @@ static int run_connected_session(const struct ambot_session_config *config,
                                   (unsigned int)received,
                                   handle_line,
                                   &context);
-            ambot_event_dispatch_pending(&events, ambot_commands_handle_event, &commands);
+            ambot_event_dispatch_pending(&events, dispatch_event, &dispatch);
         }
     }
 
@@ -137,6 +168,7 @@ int ambot_session_run(const struct ambot_session_config *config)
 {
     struct ambot_rexx rexx;
     struct ambot_control control;
+    struct ambot_hook_context hooks;
     unsigned long backoff = 1;
 
     ambot_control_init(&control);
@@ -146,6 +178,7 @@ int ambot_session_run(const struct ambot_session_config *config)
         return 20;
     }
     puts("AmBot: ARexx port AMBOT ready");
+    ambot_hooks_init(&hooks, &rexx, &control);
 
     if (ambot_net_open() != 0) {
         puts("AmBot: unable to open bsdsocket.library");
@@ -155,6 +188,7 @@ int ambot_session_run(const struct ambot_session_config *config)
 
     while (!ctrl_c_requested() && !control.quit_requested) {
         int sock;
+        int session_rc;
 
         ambot_rexx_process(&rexx, &control);
         if (!control.connect_requested) {
@@ -168,8 +202,20 @@ int ambot_session_run(const struct ambot_session_config *config)
         if (sock >= 0) {
             puts("AmBot: connected");
             backoff = 1;
-            (void)run_connected_session(config, sock, &rexx, &control);
+            ambot_control_set_socket(&control, sock);
+            emit_lifecycle(&hooks, AMBOT_EVENT_CONNECT, config, "connected");
+            session_rc = run_connected_session(config, sock, &rexx, &control, &hooks);
             ambot_net_close_socket(sock);
+            ambot_control_set_socket(&control, -1);
+
+            if (control.disconnect_requested)
+                emit_lifecycle(&hooks, AMBOT_EVENT_DISCONNECT, config, "requested");
+            else if (control.quit_requested || ctrl_c_requested())
+                emit_lifecycle(&hooks, AMBOT_EVENT_DISCONNECT, config, "stopped");
+            else if (session_rc != 0)
+                emit_lifecycle(&hooks, AMBOT_EVENT_DISCONNECT, config, "connection-lost");
+            else
+                emit_lifecycle(&hooks, AMBOT_EVENT_DISCONNECT, config, "disconnected");
 
             if (control.quit_requested || ctrl_c_requested()) break;
 
@@ -198,6 +244,7 @@ int ambot_session_run(const struct ambot_session_config *config)
         }
     }
 
+    printf("AmBot: hooks invoked=%lu failed=%lu\n", hooks.invoked, hooks.failed);
     ambot_control_set_socket(&control, -1);
     ambot_net_close();
     ambot_rexx_close(&rexx);
