@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 
 #include "networks.h"
@@ -14,6 +13,28 @@ static void copy_value(char *dst, unsigned int size, const char *src)
     dst[n] = '\0';
 }
 
+static void copy_network(struct ambot_network_config *dst,
+                         const struct ambot_config_network *src)
+{
+    unsigned int i;
+    memset(dst, 0, sizeof(*dst));
+    copy_value(dst->name, sizeof(dst->name), src->name);
+    copy_value(dst->host, sizeof(dst->host), src->host);
+    dst->port = src->port;
+    copy_value(dst->nick, sizeof(dst->nick), src->nick);
+    copy_value(dst->user, sizeof(dst->user), src->user);
+    copy_value(dst->pass, sizeof(dst->pass), src->pass);
+    copy_value(dst->owner, sizeof(dst->owner), src->owner);
+    copy_value(dst->hook_dir, sizeof(dst->hook_dir), src->hook_dir);
+    copy_value(dst->module_dir, sizeof(dst->module_dir), src->module_dir);
+    for (i = 0; i < src->channel_count; ++i)
+        copy_value(dst->channels[i], sizeof(dst->channels[i]), src->channels[i]);
+    dst->channel_count = src->channel_count;
+    dst->upstream = src->use_ambnc ? AMBOT_UPSTREAM_AMBNC : AMBOT_UPSTREAM_DIRECT;
+    copy_value(dst->ambnc_host, sizeof(dst->ambnc_host), src->ambnc_host);
+    dst->ambnc_port = src->ambnc_port;
+}
+
 void ambot_networks_init(struct ambot_networks *networks)
 {
     memset(networks, 0, sizeof(*networks));
@@ -22,29 +43,39 @@ void ambot_networks_init(struct ambot_networks *networks)
 int ambot_networks_from_config(struct ambot_networks *networks,
                                const struct ambot_config *config)
 {
-    struct ambot_network_config *network;
     unsigned int i;
-
     ambot_networks_init(networks);
-    if (config->host[0] == '\0' || config->nick[0] == '\0') return -1;
 
-    network = &networks->items[0];
-    copy_value(network->name, sizeof(network->name), "default");
-    copy_value(network->host, sizeof(network->host), config->host);
-    network->port = config->port;
-    copy_value(network->nick, sizeof(network->nick), config->nick);
-    copy_value(network->user, sizeof(network->user), config->user);
-    copy_value(network->pass, sizeof(network->pass), config->pass);
-    copy_value(network->owner, sizeof(network->owner), config->owner);
-    copy_value(network->hook_dir, sizeof(network->hook_dir), config->hook_dir);
-    copy_value(network->module_dir, sizeof(network->module_dir), config->module_dir);
-    for (i = 0; i < config->channel_count; ++i)
-        copy_value(network->channels[i], sizeof(network->channels[i]), config->channels[i]);
-    network->channel_count = config->channel_count;
-    network->upstream = config->use_ambnc ? AMBOT_UPSTREAM_AMBNC : AMBOT_UPSTREAM_DIRECT;
-    copy_value(network->ambnc_host, sizeof(network->ambnc_host), config->ambnc_host);
-    network->ambnc_port = config->ambnc_port;
-    networks->count = 1;
+    if (config->network_count != 0) {
+        for (i = 0; i < config->network_count && i < AMBOT_NETWORKS_MAX; ++i)
+            copy_network(&networks->items[i], &config->networks[i]);
+        networks->count = config->network_count > AMBOT_NETWORKS_MAX ? AMBOT_NETWORKS_MAX : config->network_count;
+        networks->skipped = config->networks_skipped;
+        return networks->count != 0 ? 0 : -1;
+    }
+
+    if (config->host[0] == '\0' || config->nick[0] == '\0') return -1;
+    {
+        struct ambot_config_network legacy;
+        memset(&legacy, 0, sizeof(legacy));
+        copy_value(legacy.name, sizeof(legacy.name), "default");
+        copy_value(legacy.host, sizeof(legacy.host), config->host);
+        legacy.port = config->port;
+        copy_value(legacy.nick, sizeof(legacy.nick), config->nick);
+        copy_value(legacy.user, sizeof(legacy.user), config->user);
+        copy_value(legacy.pass, sizeof(legacy.pass), config->pass);
+        copy_value(legacy.owner, sizeof(legacy.owner), config->owner);
+        copy_value(legacy.hook_dir, sizeof(legacy.hook_dir), config->hook_dir);
+        copy_value(legacy.module_dir, sizeof(legacy.module_dir), config->module_dir);
+        for (i = 0; i < config->channel_count; ++i)
+            copy_value(legacy.channels[i], sizeof(legacy.channels[i]), config->channels[i]);
+        legacy.channel_count = config->channel_count;
+        legacy.use_ambnc = config->use_ambnc;
+        copy_value(legacy.ambnc_host, sizeof(legacy.ambnc_host), config->ambnc_host);
+        legacy.ambnc_port = config->ambnc_port;
+        copy_network(&networks->items[0], &legacy);
+        networks->count = 1;
+    }
     return 0;
 }
 
