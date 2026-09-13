@@ -48,12 +48,15 @@ Runtime qualification remains separate; see `docs/M3.md`.
 
 `RELOAD` is reserved and returns RC 5 until the configuration milestone. Runtime qualification remains separate; see `docs/M4.md`.
 
-## M5 — ARexx event automation
+## M5 — ARexx event automation — IMPLEMENTED
 
 - event-to-script hooks
 - ON_PRIVMSG, ON_NOTICE, ON_JOIN, ON_PART, ON_QUIT, ON_KICK, ON_TOPIC, ON_NICK, ON_CONNECT, ON_DISCONNECT
-- script arguments and return-code contract
-- examples and error isolation
+- stable script argument contract
+- return-code logging and hook failure isolation
+- example hook script
+
+Runtime qualification remains separate; see `docs/M5.md`.
 
 ## M6 — Persistence and modules
 
