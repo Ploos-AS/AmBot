@@ -6,8 +6,8 @@
 
 static void usage(const char *program)
 {
-    printf("Usage: %s HOST PORT NICK [USER] [PASS]\n", program);
-    puts("Example: AmBot irc.libera.chat 6667 AmBot");
+    printf("Usage: %s HOST PORT NICK [USER] [PASS] [OWNER]\n", program);
+    puts("Example: AmBot irc.libera.chat 6667 AmBot ambot secret MyNick");
 }
 
 int ambot_run(int argc, char **argv)
@@ -18,7 +18,7 @@ int ambot_run(int argc, char **argv)
     puts(AMBOT_NAME " " AMBOT_VERSION);
     puts("ARexx port reserved: " AMBOT_REXX_PORT);
 
-    if (argc < 4 || argc > 6) {
+    if (argc < 4 || argc > 7) {
         usage(argv[0]);
         return 10;
     }
@@ -34,6 +34,7 @@ int ambot_run(int argc, char **argv)
     config.nick = argv[3];
     config.user = argc >= 5 ? argv[4] : argv[3];
     config.pass = argc >= 6 ? argv[5] : 0;
+    config.owner_nick = argc >= 7 ? argv[6] : 0;
 
     return ambot_session_run(&config);
 }
