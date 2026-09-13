@@ -14,6 +14,8 @@
 #include "operations.h"
 #include "rexx.h"
 
+#define AMBOT_REXX_SCRIPT_COMMAND_MAX 1024
+
 struct Library *RexxSysBase = 0;
 static char ambot_rexx_port_name[] = AMBOT_REXX_PORT;
 
@@ -42,6 +44,30 @@ static void uppercase(char *text)
         *text = (char)toupper((unsigned char)*text);
         ++text;
     }
+}
+
+static int append_text(char *dst, unsigned int size, unsigned int *length, const char *src)
+{
+    while (*src != '\0') {
+        if (*length + 1 >= size) return -1;
+        dst[(*length)++] = *src++;
+    }
+    dst[*length] = '\0';
+    return 0;
+}
+
+static int append_quoted_arg(char *dst, unsigned int size, unsigned int *length, const char *src)
+{
+    if (append_text(dst, size, length, " \"") != 0) return -1;
+    while (src != 0 && *src != '\0') {
+        char ch = *src++;
+        if (ch == '\r' || ch == '\n') ch = ' ';
+        if (ch == '"') ch = '\'';
+        if (*length + 1 >= size) return -1;
+        dst[(*length)++] = ch;
+        dst[*length] = '\0';
+    }
+    return append_text(dst, size, length, "\"");
 }
 
 static int send_command(struct ambot_control *control,
@@ -207,4 +233,62 @@ void ambot_rexx_process(struct ambot_rexx *rexx, struct ambot_control *control)
         }
         ReplyMsg((struct Message *)message);
     }
+}
+
+int ambot_rexx_run_script(const char *script_path,
+                          const char *event_name,
+                          const char *nick,
+                          const char *target,
+                          const char *text)
+{
+    struct MsgPort *master;
+    struct MsgPort *reply;
+    struct RexxMsg *message;
+    char command[AMBOT_REXX_SCRIPT_COMMAND_MAX];
+    unsigned int length = 0;
+    LONG rc;
+
+    if (RexxSysBase == 0 || script_path == 0) return 20;
+
+    master = FindPort("REXX");
+    if (master == 0) return 20;
+
+    reply = CreateMsgPort();
+    if (reply == 0) return 20;
+
+    message = CreateRexxMsg(reply, (STRPTR)".ambot", (STRPTR)AMBOT_REXX_PORT);
+    if (message == 0) {
+        DeleteMsgPort(reply);
+        return 20;
+    }
+
+    command[0] = '\0';
+    if (append_text(command, sizeof(command), &length, script_path) != 0 ||
+        append_quoted_arg(command, sizeof(command), &length, event_name) != 0 ||
+        append_quoted_arg(command, sizeof(command), &length, nick) != 0 ||
+        append_quoted_arg(command, sizeof(command), &length, target) != 0 ||
+        append_quoted_arg(command, sizeof(command), &length, text) != 0) {
+        DeleteRexxMsg(message);
+        DeleteMsgPort(reply);
+        return 10;
+    }
+
+    message->rm_Args[0] = CreateArgstring(command, (LONG)strlen(command));
+    if (message->rm_Args[0] == 0) {
+        DeleteRexxMsg(message);
+        DeleteMsgPort(reply);
+        return 20;
+    }
+    message->rm_Action = RXCOMM | RXFF_RESULT;
+
+    PutMsg(master, (struct Message *)message);
+    WaitPort(reply);
+    (void)GetMsg(reply);
+    rc = message->rm_Result1;
+
+    DeleteArgstring(message->rm_Args[0]);
+    if (message->rm_Result2 != 0) DeleteArgstring((STRPTR)message->rm_Result2);
+    DeleteRexxMsg(message);
+    DeleteMsgPort(reply);
+    return (int)rc;
 }
