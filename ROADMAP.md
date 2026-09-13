@@ -29,13 +29,15 @@ Runtime qualification on classic Amiga/FS-UAE remains a separate qualification s
 
 Runtime qualification remains separate; see `docs/M2.md`.
 
-## M3 — Bot commands
+## M3 — Bot commands — IMPLEMENTED
 
 - command prefix handling
 - command registry and dispatch
-- sender/channel context
-- basic permission model
+- sender/channel/private-message context
+- USER/ADMIN permission model with optional owner nick
 - built-in HELP, STATUS and VERSION commands
+
+Runtime qualification remains separate; see `docs/M3.md`.
 
 ## M4 — ARexx command API
 
