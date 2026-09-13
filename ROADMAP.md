@@ -93,7 +93,25 @@ Runtime qualification remains separate; see `docs/M8.md`.
 
 ## M9 — Qualification and release
 
-- automated host/static qualification
-- FS-UAE/AROS CI where practical
-- local AmigaOS 2.04+ runtime qualification
-- release packaging and documentation
+### M9.1 — AROS runner qualification — PASS
+
+- static qualification: PASS
+- pinned Bebbo `-m68000` native cross-build: PASS
+- native binary recognized as AmigaOS loadseg executable: PASS
+- FS-UAE/A1200/internal AROS guest execution: PASS
+- evidence recorded in `docs/M9_1.md`
+
+### M9.2 — Local AmigaOS runtime qualification — PENDING
+
+- AmigaOS 2.04+ runtime launch
+- `bsdsocket.library` live IRC connection/reconnect
+- ARexx command API and event hooks
+- persistent config and reload
+- multiple networks and AmBNC integration
+- CAP/SASL behavior
+
+### M9.3 — Release packaging — PENDING
+
+- release archive
+- checksums
+- release notes and documentation
