@@ -5,6 +5,7 @@
 #include <proto/dos.h>
 #include <proto/exec.h>
 
+#include "events.h"
 #include "irc.h"
 #include "net.h"
 #include "session.h"
@@ -14,6 +15,7 @@
 
 struct line_context {
     int sock;
+    struct ambot_event_queue *events;
 };
 
 static int ctrl_c_requested(void)
@@ -21,9 +23,20 @@ static int ctrl_c_requested(void)
     return (SetSignal(0L, 0L) & SIGBREAKF_CTRL_C) != 0;
 }
 
+static void print_event(const struct ambot_event *event, void *userdata)
+{
+    (void)userdata;
+    printf("event %-7s nick=%s target=%s text=%s\n",
+           ambot_event_type_name(event->type),
+           event->nick,
+           event->target,
+           event->text);
+}
+
 static void handle_line(const char *line, void *userdata)
 {
     struct line_context *context = (struct line_context *)userdata;
+    struct ambot_event event;
 
     printf("< %s\n", line);
 
@@ -35,17 +48,27 @@ static void handle_line(const char *line, void *userdata)
             printf("> %s\n", response);
             (void)ambot_irc_send_line(context->sock, response);
         }
+        return;
+    }
+
+    if (ambot_event_from_irc_line(line, &event)) {
+        if (ambot_event_queue_push(context->events, &event) != 0) {
+            printf("AmBot: event queue full; dropped=%lu\n", context->events->dropped);
+        }
     }
 }
 
 static int run_connected_session(const struct ambot_session_config *config, int sock)
 {
     struct ambot_irc_framer framer;
+    struct ambot_event_queue events;
     struct line_context context;
     char buffer[AMBOT_RECV_BUFFER];
 
     context.sock = sock;
+    context.events = &events;
     ambot_irc_framer_init(&framer);
+    ambot_event_queue_init(&events);
 
     if (ambot_irc_send_registration(sock,
                                     config->nick,
@@ -65,6 +88,7 @@ static int run_connected_session(const struct ambot_session_config *config, int 
                               (unsigned int)received,
                               handle_line,
                               &context);
+        ambot_event_dispatch_pending(&events, print_event, 0);
     }
 
     return 0;
