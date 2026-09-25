@@ -11,26 +11,20 @@ AmBot is a programmable IRC bot and automation engine for classic Amiga systems,
 - License: MIT
 - Toolchain: Bebbo `m68k-amigaos-gcc`
 
-## Current milestone: M1
+## Current milestone: M9.2
 
-M1 implements the first real IRC session layer:
-
-- opens `bsdsocket.library`
-- resolves IPv4 hosts with `gethostbyname()`
-- TCP connect/disconnect
-- bounded 512-byte IRC line framing
-- optional PASS plus NICK/USER registration
-- PING/PONG handling
-- reconnect backoff from 1 second up to a 30-second ceiling
-- Ctrl-C shutdown path
-
-The current M1 runtime is deliberately small: one IRC server connection, no channel event engine yet, no bot command dispatcher yet, and no live ARexx port yet. Those are later milestones.
+M0-M8 are implemented and M9.1 automated AROS/FS-UAE qualification is PASS.
+M9.2 now prepares local licensed-AmigaOS runtime qualification for networking,
+ARexx, hooks, reload, multiple networks, AmBNC integration and CAP/SASL.
+The milestone remains PENDING until the visible AmigaOS checklist is completed.
 
 ## Build
 
 ```sh
 make
 make check
+make amiga
+make qualify-m9_2
 ```
 
 Override the cross compiler if needed:
