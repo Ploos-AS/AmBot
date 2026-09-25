@@ -71,5 +71,6 @@ M1 uses plain TCP. TLS/SASL are intentionally deferred to the modern IRC milesto
 4. Route IRC events through a shared dispatcher so built-ins and ARexx scripts see the same event model.
 5. Prefer bounded memory structures suitable for classic hardware.
 6. Keep AmBot interoperable with AmBNC without requiring it.
+7. Keep PBMP/BotWeb support optional; AmBot must remain fully usable without a web control plane.
 
 See `ROADMAP.md`, `docs/ARCHITECTURE.md` and `docs/M1.md` for the planned progression and M1 details.

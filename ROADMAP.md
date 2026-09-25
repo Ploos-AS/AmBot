@@ -115,3 +115,19 @@ Runtime qualification remains separate; see `docs/M8.md`.
 - release archive
 - checksums
 - release notes and documentation
+
+
+## M10 — PBMP / BotWeb integration — PLANNED
+
+- optional PBMP/1 management adapter; AmBot remains fully standalone
+- required discovery/status methods: `pbmp.info`, `capabilities.list`, `bot.info`, `networks.list`
+- capability-driven extensions for channels, ARexx modules, logs and metrics where practical
+- bounded PBMP parser/serializer suitable for the 68000 baseline
+- no HTTP server, HTML, JavaScript or BotWeb frontend code inside AmBot
+- transport separated from PBMP message handling; do not assume Unix domain sockets on AmigaOS
+- local/bridge transport built on Amiga-appropriate IPC or `bsdsocket.library`
+- remote TCP management disabled by default; any remote transport must add authentication, confidentiality and integrity outside or alongside PBMP
+- BotWeb interoperability qualification against the same PBMP/1 contract used by LuCa and Engo
+- PBMP failure or absence must never prevent IRC, ARexx or standalone operation
+
+M10 starts after M9 release qualification so management integration does not destabilize the current release path.

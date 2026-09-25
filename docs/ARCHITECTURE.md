@@ -27,6 +27,14 @@ The event vocabulary reserved for M5 includes:
 
 All externally callable operations should use shared core functions so built-ins, future UI paths and ARexx do not duplicate behavior.
 
+## PBMP / BotWeb relationship
+
+BotWeb is an optional external control plane. AmBot will implement the implementation-neutral PBMP/1 contract rather than embed a web server or BotWeb-specific UI code. The initial profile is limited to discovery and read-only status: `pbmp.info`, `capabilities.list`, `bot.info`, and `networks.list`.
+
+PBMP message handling must remain independent of transport. LuCa and Engo can use local Unix sockets, but classic AmigaOS does not provide that same baseline. AmBot therefore uses an Amiga-appropriate local/bridge adapter while retaining identical PBMP messages. Network-exposed management is not enabled by default.
+
+ARexx remains AmBot's primary native automation API. PBMP is a complementary management API for external control planes and must call shared core/status functions rather than duplicate IRC or ARexx behavior.
+
 ## AmBNC relationship
 
 AmBot and AmBNC are sister projects. AmBot must work as a standalone IRC bot, but later milestones may allow AmBot to use AmBNC as its persistent upstream transport. Shared concepts should remain compatible without tightly coupling the two repositories.
