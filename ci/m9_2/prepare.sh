@@ -1,0 +1,34 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
+OUT="${M9_2_OUT:-$ROOT/build/m9_2}"
+
+mkdir -p "$OUT/AmBot" "$OUT/evidence"
+
+cp "$ROOT/AmBot" "$OUT/AmBot/AmBot"
+cp "$ROOT/examples/AmBot.cfg" "$OUT/AmBot/AmBot.cfg"
+cp "$ROOT/examples/AmBot-Multi.cfg" "$OUT/AmBot/AmBot-Multi.cfg"
+cp "$ROOT/examples/AmBot-Modern.cfg" "$OUT/AmBot/AmBot-Modern.cfg"
+cp "$ROOT/examples/ambot.rexx" "$OUT/AmBot/ambot.rexx"
+cp "$ROOT/examples/ON_PRIVMSG.rexx" "$OUT/AmBot/ON_PRIVMSG.rexx"
+cp "$ROOT/ci/m9_2/QUALIFICATION_CHECKLIST.md" "$OUT/evidence/QUALIFICATION_CHECKLIST.md"
+
+if command -v sha256sum >/dev/null 2>&1; then
+  sha256sum "$OUT/AmBot/AmBot" > "$OUT/evidence/AmBot.sha256"
+fi
+
+cat > "$OUT/README.txt" <<'EOF'
+AmBot M9.2 local qualification bundle.
+
+This directory contains only redistributable AmBot material.
+Provide licensed AmigaOS/Kickstart files separately in your local FS-UAE or
+real-Amiga environment. Never copy ROMs, Workbench/AmigaOS files or secrets
+back into the repository.
+
+Run the checklist in evidence/QUALIFICATION_CHECKLIST.md and retain visible
+transcripts/screenshots outside Git as appropriate.
+EOF
+
+echo "M9.2 bundle prepared at: $OUT"
+echo "Qualification status remains PENDING until the visible AmigaOS run."
