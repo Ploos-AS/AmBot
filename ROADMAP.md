@@ -103,6 +103,8 @@ Runtime qualification remains separate; see `docs/M8.md`.
 
 ### M9.2 — Local AmigaOS runtime qualification — PENDING
 
+Qualification harness and evidence checklist are implemented; a visible licensed-AmigaOS run is still required. See `docs/M9_2_QUALIFICATION.md`.
+
 - AmigaOS 2.04+ runtime launch
 - `bsdsocket.library` live IRC connection/reconnect
 - ARexx command API and event hooks
