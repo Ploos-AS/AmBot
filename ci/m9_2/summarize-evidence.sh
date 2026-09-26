@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 out="${1:-build/m9_2}"
-ev="$out/evidence"
+ev="$out/AmBot/evidence"
 fixture="$ev/host-fixture.jsonl"
 proxy="$ev/tls-proxy.jsonl"
 pass=0; pending=0; fail=0
