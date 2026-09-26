@@ -4,5 +4,6 @@ Version >AMBOTQ:evidence/AmigaOS-Version.txt
 List LIBS:bsdsocket.library >AMBOTQ:evidence/bsdsocket-library.txt
 List REXX:AmBot ALL >AMBOTQ:evidence/rexx-hooks.txt
 Echo "OVERALL=PENDING" >AMBOTQ:evidence/Amiga-runtime-status.txt
+Type AMBOTQ:M9_2-RUN-ID.txt >>AMBOTQ:evidence/Amiga-runtime-status.txt
 Echo "Set PASS only after every required checklist row has evidence." >>AMBOTQ:evidence/Amiga-runtime-status.txt
 Echo "Environment snapshot written to AMBOTQ:evidence/."
