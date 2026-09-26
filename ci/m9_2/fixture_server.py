@@ -74,7 +74,7 @@ class Handler(socketserver.StreamRequestHandler):
                     emit("isolation_probe",network="beta",connection=self.connection_no)
             elif cmd=="JOIN" and self.nick:
                 ch=args.lstrip(":").split()[0]; self.send(":%s!ambot@fixture JOIN :%s"%(self.nick,ch))
-                self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_HOOK"%ch); emit("join",network=self.server.network,channel=ch)
+                self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_HOOK"%ch)\n                self.send(":fixture-user!test@fixture NOTICE %s :M9_2_FAILHOOK"%ch)\n                self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_AFTER_FAIL"%ch)\n                emit("hook_failure_sequence",network=self.server.network,channel=ch)\n                emit("join",network=self.server.network,channel=ch)
             elif cmd in ("PRIVMSG","NOTICE"):
                 target,_,msg=args.partition(" "); emit(cmd.lower(),network=self.server.network,target=target,text=msg.lstrip(":"))
             elif cmd=="QUIT": break
