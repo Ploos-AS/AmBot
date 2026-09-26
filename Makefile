@@ -8,7 +8,7 @@ SOURCES := src/main.c src/net.c src/irc.c src/events.c src/commands.c src/operat
 OBJECTS := $(SOURCES:.c=.o)
 HEADERS := include/ambot.h include/net.h include/irc.h include/events.h include/commands.h include/operations.h include/rexx.h include/hooks.h include/config.h include/modules.h include/networks.h include/modernirc.h include/multinet.h include/session.h
 
-.PHONY: all clean check amiga qualify-m9_2 check-m9_2 review-m9_2-evidence
+.PHONY: all clean check amiga qualify-m9_2 check-m9_2 review-m9_2-evidence run-m9_2-host
 
 all: $(TARGET)
 
@@ -49,3 +49,7 @@ qualify-m9_2: all
 
 review-m9_2-evidence:
 	@sh ci/m9_2/summarize-evidence.sh
+
+
+run-m9_2-host:
+	@bash ci/m9_2/run-host-fixture.sh
