@@ -36,6 +36,12 @@ if [[ ! -f "$out/AmBot/AmBot-SASL-Failure-M9_2.cfg.in" ]]; then
 fi
 sed -e "s|HOST_IP|$host_ip|g" "$out/AmBot/AmBot-SASL-Failure-M9_2.cfg.in" >"$fail_cfg"
 chmod 600 "$fail_cfg"
+permanent_cfg="$out/AmBot/AmBot-Permanent-Failure-M9_2.cfg"
+if [[ ! -f "$out/AmBot/AmBot-Permanent-Failure-M9_2.cfg.in" ]]; then
+  echo "ERROR: missing permanent failure profile; run make qualify-m9_2 first" >&2; exit 2
+fi
+sed -e "s|HOST_IP|$host_ip|g" "$out/AmBot/AmBot-Permanent-Failure-M9_2.cfg.in" >"$permanent_cfg"
+chmod 600 "$permanent_cfg"
 
 log="$ev/host-fixture.jsonl"
 : >"$log"
@@ -51,6 +57,7 @@ echo "M9.2 host fixture ready."
 echo "  IRC evidence: $log"
 echo "  Guest config: $cfg"
 echo "  SASL failure phase: $fail_cfg"
+echo "  Permanent failure phase: $permanent_cfg"
 echo "  Host address: $host_ip"
 echo "Leave this running during the visible FS-UAE/AmigaOS test."
 echo "Press Ctrl-C only after Snapshot-M9_2 and Shutdown-M9_2.rexx."
