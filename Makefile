@@ -8,7 +8,7 @@ SOURCES := src/main.c src/net.c src/irc.c src/events.c src/commands.c src/operat
 OBJECTS := $(SOURCES:.c=.o)
 HEADERS := include/ambot.h include/net.h include/irc.h include/events.h include/commands.h include/operations.h include/rexx.h include/hooks.h include/config.h include/modules.h include/networks.h include/modernirc.h include/multinet.h include/session.h
 
-.PHONY: all clean check amiga qualify-m9_2 check-m9_2 review-m9_2-evidence run-m9_2-host
+.PHONY: all clean check amiga qualify-m9_2 check-m9_2 review-m9_2-evidence run-m9_2-host run-m9_2-tls
 
 all: $(TARGET)
 
@@ -30,7 +30,7 @@ clean:
 
 
 check-m9_2:
-	@python3 -m py_compile ci/m9_2/fixture_server.py ci/m9_2/tls_proxy.py
+	@python3 -m py_compile ci/m9_2/fixture_server.py ci/m9_2/tls_proxy.py ci/m9_2/tls_fixture.py
 	@test -f ci/m9_2/AmBot-M9_2.cfg.in\n\t@test -f ci/m9_2/AmBot-SASL-Failure-M9_2.cfg.in
 	@test -f ci/m9_2/rexx/Commands-M9_2.rexx
 	@test -f ci/m9_2/rexx/ON_PRIVMSG.rexx\n\t@test -f ci/m9_2/rexx/ON_NOTICE.rexx
@@ -53,3 +53,6 @@ review-m9_2-evidence:
 
 run-m9_2-host:
 	@bash ci/m9_2/run-host-fixture.sh
+
+run-m9_2-tls:
+	@bash ci/m9_2/run-tls-transport.sh
