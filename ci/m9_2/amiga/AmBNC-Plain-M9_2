@@ -3,5 +3,6 @@
 FailAt 20
 CD AMBOTQ:
 Echo "M9.2 AmBot -> AmBNC plaintext phase."
-AmBot -c AMBOTQ:AmBot-via-AmBNC-M9_2.cfg >AMBOTQ:evidence/ambnc-plain.txt
+Type AMBOTQ:M9_2-RUN-ID.txt >AMBOTQ:evidence/ambnc-plain.txt
+AmBot -c AMBOTQ:AmBot-via-AmBNC-M9_2.cfg >>AMBOTQ:evidence/ambnc-plain.txt
 Echo "AmBNC plaintext phase exited with RC $RC" >>AMBOTQ:evidence/ambnc-plain.txt
