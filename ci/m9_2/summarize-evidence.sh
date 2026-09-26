@@ -12,6 +12,16 @@ marker(){ if [[ -f "$ev/$1" ]] && grep -Fq "$2" "$ev/$1"; then result PASS "$3";
 
 echo 'AmBot M9.2 evidence summary (advisory; operator checklist is authoritative)'
 manifest="$ev/MANIFEST.txt"
+status="$ev/Amiga-runtime-status.txt"
+if [[ -f "$manifest" ]] && grep -Fq 'format=ambot-m9.2-evidence-v2' "$manifest"; then
+  run_id=$(sed -n 's/^run_id=//p' "$manifest")
+  source_commit=$(sed -n 's/^commit=//p' "$manifest")
+  manifest_sha=$(sed -n 's/^binary_sha256=//p' "$manifest")
+  if [[ -n "$run_id" && "$run_id" != unknown && -n "$source_commit" && "$source_commit" != unknown ]]; then result PASS 'qualification run identity present'; else result FAIL 'qualification run identity present'; fi
+  if [[ -f "$status" ]] && grep -Fxq "RUN_ID=$run_id" "$status" && grep -Fxq "COMMIT=$source_commit" "$status" && grep -Fxq "BINARY_SHA256=$manifest_sha" "$status"; then result PASS 'AmigaOS status bound to manifest identity'; else result PENDING 'AmigaOS status bound to manifest identity'; fi
+else
+  result FAIL 'M9.2 evidence manifest v2 present'
+fi
 if [[ -f "$manifest" ]] && [[ -f "$out/AmBot/AmBot" ]] && command -v sha256sum >/dev/null 2>&1; then
   expected=$(sed -n 's/^binary_sha256=//p' "$manifest")
   actual=$(sha256sum "$out/AmBot/AmBot" | awk '{print $1}')
