@@ -25,6 +25,13 @@ if [[ -f "$out/AmBot/evidence/ambnc.txt" ]]; then r PASS "AmBNC identity evidenc
 if [[ -f "$out/AmBot/evidence/ambnc-plain.txt" ]] && grep -Fq "network via-ambnc connected" "$out/AmBot/evidence/ambnc-plain.txt"; then r PASS "real AmBNC plaintext transcript present"; else r PENDING "run visible AmBNC plaintext phase"; fi
 if [[ -f "$out/AmBot/evidence/ambnc-tls.txt" ]] && grep -Fq "network via-ambnc-tls connected" "$out/AmBot/evidence/ambnc-tls.txt"; then r PASS "real AmBNC delegated TLS client transcript present"; else r PENDING "run visible AmBNC delegated TLS phase"; fi
 if [[ -f "$out/AmBot/evidence/tls-proxy.jsonl" ]] && grep -Fq '"tls_version":' "$out/AmBot/evidence/tls-proxy.jsonl" && [[ -f "$out/AmBot/evidence/tls-fixture.jsonl" ]] && grep -Fq '"event": "tls_irc_registered"' "$out/AmBot/evidence/tls-fixture.jsonl" && grep -Fq '"event": "tls_irc_pong"' "$out/AmBot/evidence/tls-fixture.jsonl"; then r PASS "delegated TLS IRC evidence present"; else r PENDING "run make run-m9_2-tls with real AmBNC path"; fi
+manifest_run=$(sed -n 's/^run_id=//p' "$manifest" 2>/dev/null || true)
+for phase in sasl-failure permanent-failure ambnc-plain ambnc-tls; do
+  pf="$out/AmBot/evidence/$phase.txt"
+  if [[ -f "$pf" ]]; then
+    if [[ -n "$manifest_run" ]] && grep -Fxq "RUN_ID=$manifest_run" "$pf"; then r PASS "$phase transcript run identity"; else r FAIL "$phase transcript belongs to another run"; fi
+  fi
+done
 if [[ -f "$out/AmBot/evidence/Amiga-runtime-status.txt" ]]; then r PASS "AmigaOS snapshot evidence present"; else r PENDING "visible licensed AmigaOS run required"; fi
 echo
 echo "PASS=$pass PENDING=$pending FAIL=$fail"
