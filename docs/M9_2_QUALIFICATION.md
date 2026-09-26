@@ -30,3 +30,23 @@ until the visible licensed-AmigaOS run is completed.
 
 No Kickstart ROM, Workbench/AmigaOS files, credentials, SASL secrets or other
 licensed material may be committed to this repository.
+
+## Deterministic host fixture
+
+`ci/m9_2/fixture_server.py` provides two local IRC endpoints. Alpha requires
+CAP/SASL PLAIN and beta exercises a second simultaneous network. The fixture
+redacts PASS and AUTHENTICATE payloads from its JSON-lines transcript.
+
+Example host invocation:
+
+```sh
+python3 ci/m9_2/fixture_server.py --sasl-user m9user --sasl-pass "$AMBOT_M9_SECRET"
+```
+
+Copy `AmBot-M9_2.cfg.in` from the prepared bundle to the guest, replace
+`HOST_IP` with the fixture host reachable from the Amiga and replace the
+placeholder SASL password locally. Never commit the resulting config.
+
+The direct fixture qualifies deterministic IRC/CAP/SASL and multi-network
+behavior. The separate AmBNC-backed and TLS=UPSTREAM checklist rows still
+require AmBNC in the path and must not be inferred from the direct fixture.
