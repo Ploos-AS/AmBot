@@ -52,12 +52,18 @@ int ambot_networks_from_config(struct ambot_networks *networks,
     ambot_networks_init(networks);
 
     if (config->network_count != 0) {
-        for (i = 0; i < config->network_count && i < AMBOT_NETWORKS_MAX; ++i)
-            copy_network(&networks->items[i], &config->networks[i]);
-        networks->count = config->network_count > AMBOT_NETWORKS_MAX ? AMBOT_NETWORKS_MAX : config->network_count;
+        unsigned int accepted = 0;
         networks->skipped = config->networks_skipped;
-        for (i = 0; i < networks->count; ++i)
-            if (ambot_network_validate_security(&networks->items[i]) != 0) return -1;
+        for (i = 0; i < config->network_count && i < AMBOT_NETWORKS_MAX; ++i) {
+            struct ambot_network_config candidate;
+            copy_network(&candidate, &config->networks[i]);
+            if (ambot_network_validate_security(&candidate) != 0) {
+                ++networks->skipped;
+                continue;
+            }
+            networks->items[accepted++] = candidate;
+        }
+        networks->count = (unsigned char)accepted;
         return networks->count != 0 ? 0 : -1;
     }
 
