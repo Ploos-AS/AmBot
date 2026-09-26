@@ -1,0 +1,20 @@
+# M9.2 permanent-security-failure isolation profile.
+# invalid-security is intentionally invalid: TLS=UPSTREAM requires UPSTREAM=AMBNC.
+
+[NETWORK invalid-security]
+HOST=fixture.invalid
+PORT=17667
+NICK=AmBotInvalid
+USER=ambot
+TLS=UPSTREAM
+CAP=OFF
+SASL=OFF
+
+[NETWORK survivor]
+HOST=HOST_IP
+PORT=17668
+NICK=AmBotConfigSurvivor
+USER=ambot
+CAP=OFF
+SASL=OFF
+CHANNEL=#m9-beta
