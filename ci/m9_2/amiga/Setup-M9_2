@@ -1,0 +1,14 @@
+; Run once from an AmigaShell after AMBOTQ: appears.
+FailAt 20
+Protect AMBOTQ:AmBot +E
+If NOT EXISTS REXX:AmBot
+  MakeDir REXX:AmBot
+EndIf
+If NOT EXISTS REXX:AmBot/M9_2
+  MakeDir REXX:AmBot/M9_2
+EndIf
+Copy AMBOTQ:M9_2/ON_PRIVMSG.rexx REXX:AmBot/M9_2/ON_PRIVMSG.rexx
+Delete AMBOTQ:evidence/hooks.log QUIET
+Echo "M9.2 hook installed under REXX:AmBot/M9_2"
+Echo "Start RexxMast if it is not already running."
+Echo "Open a second Shell, then run AMBOTQ:Start-M9_2 here."
