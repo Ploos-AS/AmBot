@@ -322,7 +322,7 @@ int ambot_session_run(const struct ambot_session_config *startup)
         return 20;
     }
 
-    if (config.botai_url[0] != '\\0') {
+    if (config.botai_url[0] != '\0') {
         if (ambot_botai_configure(&botai, config.botai_url, config.botai_expert,
                                   config.botai_timeout_seconds) != 0) {
             puts("AmBot: BotAI configuration invalid; AI disabled");
