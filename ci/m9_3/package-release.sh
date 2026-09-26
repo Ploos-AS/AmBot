@@ -26,5 +26,6 @@ license=MIT
 EOF
 ( cd "$out" && tar -czf AmBot-m68k-amigaos.tar.gz AmBot )
 sha256sum "$out/AmBot-m68k-amigaos.tar.gz" >"$out/AmBot-m68k-amigaos.tar.gz.sha256"
+M9_3_OUT="$out" "$root/ci/m9_3/audit-release.sh"
 echo "M9.3 release candidate prepared: $out/AmBot-m68k-amigaos.tar.gz"
 echo "Publication/tagging remains a separate explicit action."
