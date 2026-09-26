@@ -26,8 +26,8 @@ event pong alpha 'alpha PING/PONG'
 event pong beta 'beta PING/PONG'
 event cap_ls alpha 'alpha CAP negotiation'
 event sasl_pass alpha 'alpha SASL PLAIN'
-event sasl_fail alpha 'bounded SASL failure observed'
-if [[ -f "$fixture" ]] && grep -F '"event": "post_sasl_failure_survivor"' "$fixture" | grep -Fq '"network": "beta"'; then result PASS 'survivor network remains active after SASL failure'; else result PENDING 'survivor network remains active after SASL failure'; fi
+if [[ -f "$ev/sasl-failure.txt" ]] && grep -Fq 'network sasl-fail modern IRC negotiation failed' "$ev/sasl-failure.txt" && grep -Fq 'network sasl-fail disabled after negotiation failure' "$ev/sasl-failure.txt" && grep -F '"event": "sasl_fail"' "$fixture" 2>/dev/null | grep -Fq '"network": "alpha"'; then result PASS 'bounded SASL failure observed'; else result PENDING 'bounded SASL failure observed'; fi
+if [[ -f "$ev/sasl-failure.txt" ]] && grep -Fq 'network survivor connected' "$ev/sasl-failure.txt" && grep -F '"event": "post_sasl_failure_survivor"' "$fixture" 2>/dev/null | grep -Fq '"network": "beta"'; then result PASS 'survivor network remains active after SASL failure'; else result PENDING 'survivor network remains active after SASL failure'; fi
 event join alpha 'alpha channel join'
 event join beta 'beta channel join'
 event forced_drop alpha 'alpha deterministic disconnect'
