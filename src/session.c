@@ -6,6 +6,7 @@
 #include <proto/exec.h>
 
 #include "commands.h"
+#include "botai.h"
 #include "config.h"
 #include "events.h"
 #include "hooks.h"
@@ -109,7 +110,8 @@ static int run_connected_session(struct ambot_config *config,
                                  struct ambot_rexx *rexx,
                                  struct ambot_control *control,
                                  struct ambot_hook_context *hooks,
-                                 struct ambot_modules *modules)
+                                 struct ambot_modules *modules,
+                                 struct ambot_botai *botai)
 {
     struct ambot_irc_framer framer;
     struct ambot_event_queue events;
@@ -124,6 +126,7 @@ static int run_connected_session(struct ambot_config *config,
     commands.sock = sock;
     commands.bot_nick = config->nick;
     commands.owner_nick = config->owner;
+    commands.botai = botai;
     dispatch.commands = &commands;
     dispatch.hooks = hooks;
 
@@ -281,7 +284,10 @@ int ambot_session_run(const struct ambot_session_config *startup)
     struct ambot_hook_context hooks;
     struct ambot_config config;
     struct ambot_modules modules;
+    struct ambot_botai botai;
     unsigned long backoff = 1;
+
+    ambot_botai_init(&botai);
 
     ambot_config_seed(&config, startup->host, startup->port, startup->nick,
                       startup->user, startup->pass, startup->owner_nick);
@@ -316,6 +322,17 @@ int ambot_session_run(const struct ambot_session_config *startup)
         return 20;
     }
 
+    if (config.botai_url[0] != '\\0') {
+        if (ambot_botai_configure(&botai, config.botai_url, config.botai_expert,
+                                  config.botai_timeout_seconds) != 0) {
+            puts("AmBot: BotAI configuration invalid; AI disabled");
+        } else if (ambot_botai_check(&botai) != 0) {
+            puts("AmBot: BotAI unavailable or incompatible; AI disabled");
+        } else {
+            puts("AmBot: BotAI v1 compatible");
+        }
+    }
+
     if (config.network_count != 0 || config.use_ambnc) {
         int m7_rc = run_m7_networks(&config, &rexx, &control);
         ambot_control_set_socket(&control, -1);
@@ -344,7 +361,7 @@ int ambot_session_run(const struct ambot_session_config *startup)
             backoff = 1;
             ambot_control_set_socket(&control, sock);
             emit_lifecycle(&hooks, AMBOT_EVENT_CONNECT, &config, "connected");
-            session_rc = run_connected_session(&config, sock, &rexx, &control, &hooks, &modules);
+            session_rc = run_connected_session(&config, sock, &rexx, &control, &hooks, &modules, &botai);
             ambot_net_close_socket(sock);
             ambot_control_set_socket(&control, -1);
 
