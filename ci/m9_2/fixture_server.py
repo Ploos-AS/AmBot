@@ -4,6 +4,7 @@ import argparse, base64, json, socketserver, threading, time
 
 LOCK=threading.Lock()
 CONNECTIONS={}
+SASL_FAILURE_SEEN=threading.Event()
 
 def emit(event, **fields):
     rec={"time":int(time.time()),"event":event}; rec.update(fields)
@@ -49,7 +50,8 @@ class Handler(socketserver.StreamRequestHandler):
             emit("sasl_pass",network=self.server.network)
         else:
             self.send(":fixture 904 %s :SASL failed"%(self.nick or "*"))
-            emit("sasl_fail",network=self.server.network)
+            emit("sasl_fail",network=self.server.network,connection=self.connection_no)
+            SASL_FAILURE_SEEN.set()
     def handle(self):
         self.send(":fixture NOTICE AUTH :AmBot M9.2 deterministic fixture")
         for raw in self.rfile:
@@ -68,6 +70,8 @@ class Handler(socketserver.StreamRequestHandler):
             elif cmd=="USER": self.user=args.split()[0]; self.maybe_register()
             elif cmd=="PONG":
                 emit("pong",network=self.server.network,connection=self.connection_no)
+                if self.server.network=="beta" and SASL_FAILURE_SEEN.is_set():
+                    emit("post_sasl_failure_survivor",network="beta",connection=self.connection_no)
                 if self.drop_after_pong:
                     emit("forced_drop",network=self.server.network,connection=self.connection_no)
                     return
