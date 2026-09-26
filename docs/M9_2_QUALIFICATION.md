@@ -50,3 +50,22 @@ placeholder SASL password locally. Never commit the resulting config.
 The direct fixture qualifies deterministic IRC/CAP/SASL and multi-network
 behavior. The separate AmBNC-backed and TLS=UPSTREAM checklist rows still
 require AmBNC in the path and must not be inferred from the direct fixture.
+
+## Evidence review
+
+After the visible run has written its transcripts into `build/m9_2/evidence/`,
+run:
+
+```sh
+make review-m9_2-evidence
+```
+
+The helper checks deterministic IRC registration, PING/PONG, CAP/SASL,
+channel joins, representative ARexx results, hook evidence, AmBNC commit
+evidence, TLS-proxy negotiation and basic secret redaction.
+
+Its final result is deliberately always `OVERALL=PENDING`. A script cannot
+attest that licensed AmigaOS 2.04+ was visibly running, identify the actual
+TCP/IP stack, review screenshots, or judge the manual isolation/shutdown gates.
+Any machine-detected FAIL must be resolved before an operator can mark M9.2
+PASS.
