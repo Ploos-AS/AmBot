@@ -37,7 +37,7 @@ check-m9_2:
 	@test -f ci/m9_2/AmBNC-AmBot-M9_2.cfg.in
 	@test -f ci/m9_2/AmBot-via-AmBNC-M9_2.cfg
 	@test -f ci/m9_2/AMBNC_INTEGRATION.md
-	@test -f ci/m9_2/summarize-evidence.sh
+	@test -f ci/m9_2/summarize-evidence.sh\n\t@test -f ci/m9_2/amigaos-template.fs-uae
 	@echo "M9.2 harness static checks: PASS"
 
 amiga: all
