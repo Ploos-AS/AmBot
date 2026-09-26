@@ -23,3 +23,15 @@ version in its JSON-lines log is required evidence.
 
 Do not commit generated configs, credentials, ROMs, Workbench files,
 certificates/private keys, or licensed TCP/IP stack material.
+
+## Deterministic delegated TLS phase
+
+Run `make run-m9_2-tls` on the host. It creates an ignored, short-lived local
+certificate, starts the TLS fixture on 17670 and a plaintext-to-TLS proxy on
+17669. Configure the real AmBNC test network with `TLS_MODE=PROXY` and
+`HOST=<host>`, `PORT=17669`.
+
+Record `AmBot=<commit>` and `AmBNC=<commit>` in
+`AMBOTQ:evidence/ambnc.txt`. The gate requires both identities plus a
+`tls_proxy_connected` record containing the negotiated TLS version. The
+certificate/private key remains under ignored `build/m9_2/host/tls`.
