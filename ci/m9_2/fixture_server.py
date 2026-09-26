@@ -28,7 +28,7 @@ class Handler(socketserver.StreamRequestHandler):
         self.drop_after_pong=self.server.network=="alpha" and n==1
         emit("connected",network=self.server.network,connection=n)
     def send(self,line):
-        self.wfile.write((line+"\\r\\n").encode()); self.wfile.flush()
+        self.wfile.write((line+"\r\n").encode()); self.wfile.flush()
     def maybe_register(self):
         if self.registered or not self.nick or not self.user: return
         if self.cap and not self.cap_end: return
@@ -36,7 +36,7 @@ class Handler(socketserver.StreamRequestHandler):
         self.registered=True
         self.send(":fixture 001 %s :AmBot M9.2 registered"%self.nick)
         self.send("PING :M9_2_%s"%self.server.network.upper())
-        emit("registered",network=self.server.network,nick=self.nick)
+        emit("registered",network=self.server.network,nick=self.nick,connection=self.connection_no)
     def auth(self,arg):
         if arg=="PLAIN":
             self.send("AUTHENTICATE +"); emit("sasl_plain_requested",network=self.server.network); return
@@ -53,7 +53,7 @@ class Handler(socketserver.StreamRequestHandler):
     def handle(self):
         self.send(":fixture NOTICE AUTH :AmBot M9.2 deterministic fixture")
         for raw in self.rfile:
-            line=raw.decode("utf-8","replace").rstrip("\\r\\n")
+            line=raw.decode("utf-8","replace").rstrip("\r\n")
             cmd,_,args=line.partition(" "); cmd=cmd.upper()
             emit("rx_redacted" if cmd in ("PASS","AUTHENTICATE") else "rx",
                  network=self.server.network,command=cmd,**({} if cmd in ("PASS","AUTHENTICATE") else {"line":line}))
