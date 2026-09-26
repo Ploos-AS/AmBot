@@ -58,7 +58,7 @@ static void emit_lifecycle(struct ambot_hook_context *hooks,
     ambot_hooks_dispatch_event(&event, hooks);
 }
 
-static void handle_line(const char *line, void *userdata)
+static int handle_line(const char *line, void *userdata)
 {
     struct line_context *context = (struct line_context *)userdata;
     struct ambot_event event;
@@ -71,7 +71,7 @@ static void handle_line(const char *line, void *userdata)
             printf("> %s\n", response);
             (void)ambot_irc_send_line(context->sock, response);
         }
-        return;
+        return 0;
     }
 
     if (ambot_event_from_irc_line(line, &event)) {
