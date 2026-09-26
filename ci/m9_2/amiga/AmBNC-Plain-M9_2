@@ -1,0 +1,7 @@
+; Real AmBNC must already be running with its plaintext M9.2 profile.
+; Run this in Shell 1; use AmBNC-Plain-M9_2.rexx from Shell 2.
+FailAt 20
+CD AMBOTQ:
+Echo "M9.2 AmBot -> AmBNC plaintext phase."
+AmBot -c AMBOTQ:AmBot-via-AmBNC-M9_2.cfg >AMBOTQ:evidence/ambnc-plain.txt
+Echo "AmBNC plaintext phase exited with RC $RC" >>AMBOTQ:evidence/ambnc-plain.txt
