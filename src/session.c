@@ -237,6 +237,23 @@ static int run_m7_networks(struct ambot_config *config,
             }
             continue;
         }
+        if (rc == AMBOT_MULTINET_NO_RETRYABLE_NETWORKS) {
+            puts("AmBot: all M7 networks permanently disabled; waiting for RELOAD or control request");
+            control->connect_requested = 0;
+            while (!control->connect_requested && !control->reload_requested &&
+                   !control->quit_requested && !ctrl_c_requested()) {
+                ambot_rexx_process(rexx, control);
+                Delay(5);
+            }
+            if (control->reload_requested && config->path[0] != '\0') {
+                control->reload_requested = 0;
+                if (ambot_config_load(config, config->path) != 0) {
+                    puts("AmBot: M7 config reload failed");
+                    return 10;
+                }
+            }
+            continue;
+        }
         if (rc == AMBOT_MULTINET_RECONNECT) {
             unsigned int ticks = 250;
             puts("AmBot: all M7 networks offline; reconnecting in 5 seconds");
