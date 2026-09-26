@@ -9,6 +9,16 @@ pass=0; pending=0; fail=0
 result(){ printf '%-8s %s\n' "$1" "$2"; case "$1" in PASS) pass=$((pass+1));; FAIL) fail=$((fail+1));; *) pending=$((pending+1));; esac; }
 event(){ if [[ -f "$fixture" ]] && grep -Fq "\"event\": \"$1\"" "$fixture" && grep -F "\"event\": \"$1\"" "$fixture"|grep -Fq "\"network\": \"$2\""; then result PASS "$3"; else result PENDING "$3"; fi; }
 marker(){ if [[ -f "$ev/$1" ]] && grep -Fq "$2" "$ev/$1"; then result PASS "$3"; else result PENDING "$3"; fi; }
+json_identity(){
+  local file="$1" label="$2"
+  [[ -f "$file" ]] || { result PENDING "$label identity"; return 1; }
+  if grep -F '"event":"qualification_identity"' "$file" | grep -Fq "\"run_id\":\"$run_id\"" &&
+     grep -F '"event":"qualification_identity"' "$file" | grep -Fq "\"commit\":\"$source_commit\"" &&
+     grep -F '"event":"qualification_identity"' "$file" | grep -Fq "\"binary_sha256\":\"$manifest_sha\""; then
+    result PASS "$label identity"; return 0
+  fi
+  result FAIL "$label identity"; return 1
+}
 phase_identity(){
   local file="$ev/$1" label="$2"
   [[ -f "$file" ]] || { result PENDING "$label identity"; return 1; }
@@ -37,6 +47,9 @@ if [[ -f "$manifest" ]] && [[ -f "$out/AmBot/AmBot" ]] && command -v sha256sum >
 else
   result PENDING 'qualified binary matches manifest SHA-256'
 fi
+json_identity "$fixture" 'host fixture log' || true
+json_identity "$proxy" 'TLS proxy log' || true
+json_identity "$tlsfixture" 'TLS fixture log' || true
 event fixture_ready all 'host fixture started'
 event registered alpha 'alpha IRC registration'
 event registered beta 'beta IRC registration'
