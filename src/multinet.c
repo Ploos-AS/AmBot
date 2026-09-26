@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include <proto/exec.h>
 
@@ -27,7 +28,7 @@ struct network_runtime {
     struct ambot_modules modules;
     struct ambot_modernirc modern;
     unsigned int retry_wait;
-    unsigned int retry_elapsed;
+    time_t retry_at;
     int retry_enabled;
 };
 
@@ -149,7 +150,7 @@ int ambot_multinet_run(struct ambot_networks *networks,
         } else {
             runtimes[i].retry_enabled = 1;
             runtimes[i].retry_wait = 1;
-            runtimes[i].retry_elapsed = 0;
+            runtimes[i].retry_at = time(0) + 1;
             ++retrying;
         }
         sockets[i] = runtimes[i].sock;
@@ -182,12 +183,10 @@ int ambot_multinet_run(struct ambot_networks *networks,
         }
         if (rc < 0) return AMBOT_MULTINET_RECONNECT;
 
-        if (retrying > 0 && rc == 0) {
+        if (retrying > 0) {
+            time_t now = time(0);
             for (i = 0; i < networks->count; ++i) {
-                if (!runtimes[i].retry_enabled) continue;
-                ++runtimes[i].retry_elapsed;
-                if (runtimes[i].retry_elapsed < runtimes[i].retry_wait) continue;
-                runtimes[i].retry_elapsed = 0;
+                if (!runtimes[i].retry_enabled || now < runtimes[i].retry_at) continue;
                 if (connect_runtime(&runtimes[i], rexx, control) == 0) {
                     runtimes[i].retry_enabled = 0;
                     sockets[i] = runtimes[i].sock;
@@ -201,6 +200,7 @@ int ambot_multinet_run(struct ambot_networks *networks,
                         runtimes[i].retry_wait *= 2;
                         if (runtimes[i].retry_wait > 30) runtimes[i].retry_wait = 30;
                     }
+                    runtimes[i].retry_at = now + (time_t)runtimes[i].retry_wait;
                     printf("AmBot: network %s reconnect failed; retry in %u seconds\n",
                            networks->items[i].name, runtimes[i].retry_wait);
                 }
@@ -221,7 +221,7 @@ int ambot_multinet_run(struct ambot_networks *networks,
                     if (active > 0) --active;
                     runtimes[i].retry_enabled = 1;
                     runtimes[i].retry_wait = 1;
-                    runtimes[i].retry_elapsed = 0;
+                    runtimes[i].retry_at = time(0) + 1;
                     ++retrying;
                     printf("AmBot: network %s scheduled for local reconnect\n",
                            networks->items[i].name);
