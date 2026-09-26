@@ -8,7 +8,7 @@ if [ -n "${M9_2_SYSTEM_DIR:-}" ] && [ -n "${M9_2_KICKSTART_FILE:-}" ]; then
       -e "s|@KICKSTART_FILE@|$M9_2_KICKSTART_FILE|g" \
       "$ROOT/ci/m9_2/amigaos-template.fs-uae" > "$OUT/AmBot-M9_2.fs-uae"
 fi
-mkdir -p "$OUT/AmBot/M9_2" "$OUT/evidence"
+mkdir -p "$OUT/AmBot/M9_2" "$OUT/AmBot/evidence" "$OUT/evidence"
 cp "$ROOT/AmBot" "$OUT/AmBot/AmBot"
 cp "$ROOT/examples/AmBot.cfg" "$OUT/AmBot/AmBot.cfg"
 cp "$ROOT/examples/AmBot-Multi.cfg" "$OUT/AmBot/AmBot-Multi.cfg"
@@ -19,7 +19,7 @@ cp "$ROOT/ci/m9_2/AmBot-M9_2.cfg.in" "$OUT/AmBot/AmBot-M9_2.cfg.in"
 cp "$ROOT/ci/m9_2/AmBNC-AmBot-M9_2.cfg.in" "$OUT/AmBot/AmBNC-AmBot-M9_2.cfg.in"
 cp "$ROOT/ci/m9_2/AmBot-via-AmBNC-M9_2.cfg" "$OUT/AmBot/AmBot-via-AmBNC-M9_2.cfg"
 cp "$ROOT/ci/m9_2/AMBNC_INTEGRATION.md" "$OUT/AmBot/AMBNC_INTEGRATION.md"
-cp "$ROOT/ci/m9_2/rexx/"*.rexx "$OUT/AmBot/M9_2/"
+cp "$ROOT/ci/m9_2/rexx/"*.rexx "$OUT/AmBot/M9_2/"\ncp "$ROOT/ci/m9_2/amiga/"* "$OUT/AmBot/"
 cp "$ROOT/ci/m9_2/QUALIFICATION_CHECKLIST.md" "$OUT/evidence/QUALIFICATION_CHECKLIST.md"
 if command -v sha256sum >/dev/null 2>&1; then sha256sum "$OUT/AmBot/AmBot" > "$OUT/evidence/AmBot.sha256"; fi
 cat > "$OUT/README.txt" <<'EOF'
