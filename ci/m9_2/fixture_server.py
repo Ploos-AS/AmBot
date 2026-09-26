@@ -5,6 +5,7 @@ import argparse, base64, json, socketserver, threading, time
 LOCK=threading.Lock()
 CONNECTIONS={}
 SASL_FAILURE_SEEN=threading.Event()
+ACTIVE_HANDLERS={}
 
 def emit(event, **fields):
     rec={"time":int(time.time()),"event":event}; rec.update(fields)
@@ -27,6 +28,8 @@ class Handler(socketserver.StreamRequestHandler):
             n=CONNECTIONS[self.server.network]
         self.connection_no=n
         self.drop_after_pong=self.server.network=="alpha" and n==1
+        with LOCK:
+            ACTIVE_HANDLERS[self.server.network]=self
         emit("connected",network=self.server.network,connection=n)
     def send(self,line):
         self.wfile.write((line+"\r\n").encode()); self.wfile.flush()
@@ -52,6 +55,14 @@ class Handler(socketserver.StreamRequestHandler):
             self.send(":fixture 904 %s :SASL failed"%(self.nick or "*"))
             emit("sasl_fail",network=self.server.network,connection=self.connection_no)
             SASL_FAILURE_SEEN.set()
+            with LOCK:
+                survivor=ACTIVE_HANDLERS.get("beta")
+            if survivor is not None:
+                try:
+                    survivor.send("PING :M9_2_POST_SASL_FAILURE")
+                    emit("post_sasl_failure_probe_sent",network="beta",connection=survivor.connection_no)
+                except Exception:
+                    emit("post_sasl_failure_probe_send_failed",network="beta")
     def handle(self):
         self.send(":fixture NOTICE AUTH :AmBot M9.2 deterministic fixture")
         for raw in self.rfile:
@@ -70,7 +81,7 @@ class Handler(socketserver.StreamRequestHandler):
             elif cmd=="USER": self.user=args.split()[0]; self.maybe_register()
             elif cmd=="PONG":
                 emit("pong",network=self.server.network,connection=self.connection_no)
-                if self.server.network=="beta" and SASL_FAILURE_SEEN.is_set():
+                if self.server.network=="beta" and SASL_FAILURE_SEEN.is_set() and "M9_2_POST_SASL_FAILURE" in args:
                     emit("post_sasl_failure_survivor",network="beta",connection=self.connection_no)
                 if self.drop_after_pong:
                     emit("forced_drop",network=self.server.network,connection=self.connection_no)
