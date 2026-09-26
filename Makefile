@@ -41,6 +41,8 @@ check-m9_2:
 	@grep -Fq "TLS_MODE=PROXY" ci/m9_2/AmBNC-AmBot-TLS-M9_2.cfg.in
 	@test -f ci/m9_2/AmBot-via-AmBNC-M9_2.cfg
 	@test -f ci/m9_2/AMBNC_INTEGRATION.md
+	@grep -Fq "typedef int (*ambot_irc_line_cb)" include/irc.h
+	@grep -Fq "if (runtime->sock < 0) return 1;" src/multinet.c
 	@test -f ci/m9_2/summarize-evidence.sh
 	@test -f ci/m9_2/amigaos-template.fs-uae
 	@echo "M9.2 harness static checks: PASS"
