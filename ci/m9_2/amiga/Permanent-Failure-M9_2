@@ -1,0 +1,8 @@
+; Run as a separate visible phase after the normal M9.2 session.
+; Captures console evidence that invalid-security is skipped while survivor runs.
+FailAt 20
+CD AMBOTQ:
+Echo "M9.2 permanent failure isolation phase."
+Echo "Expected: M7 networks=1 skipped=1 and survivor remains connected."
+AmBot -c AMBOTQ:AmBot-Permanent-Failure-M9_2.cfg >AMBOTQ:evidence/permanent-failure.txt
+Echo "Permanent failure phase exited with RC $RC" >>AMBOTQ:evidence/permanent-failure.txt
