@@ -4,6 +4,7 @@ out="${1:-build/m9_2}"
 ev="$out/AmBot/evidence"
 fixture="$ev/host-fixture.jsonl"
 proxy="$ev/tls-proxy.jsonl"
+tlsfixture="$ev/tls-fixture.jsonl"
 pass=0; pending=0; fail=0
 result(){ printf '%-8s %s\n' "$1" "$2"; case "$1" in PASS) pass=$((pass+1));; FAIL) fail=$((fail+1));; *) pending=$((pending+1));; esac; }
 event(){ if [[ -f "$fixture" ]] && grep -Fq "\"event\": \"$1\"" "$fixture" && grep -F "\"event\": \"$1\"" "$fixture"|grep -Fq "\"network\": \"$2\""; then result PASS "$3"; else result PENDING "$3"; fi; }
@@ -41,6 +42,7 @@ if [[ -s "$ev/hooks.log" ]] && grep -Fq 'M9.2 HOOK' "$ev/hooks.log"; then result
 if [[ -s "$ev/hooks.log" ]] && grep -Fq 'M9.2 FAILHOOK' "$ev/hooks.log" && grep -Fq 'M9_2_AFTER_FAIL' "$ev/hooks.log"; then result PASS 'hook failure isolation'; else result PENDING 'hook failure isolation'; fi
 if [[ -f "$ev/ambnc.txt" ]] && grep -Fq 'AmBot=' "$ev/ambnc.txt" && grep -Fq 'AmBNC=' "$ev/ambnc.txt"; then result PASS 'AmBNC integration commit evidence'; else result PENDING 'AmBNC integration commit evidence'; fi
 if [[ -f "$proxy" ]] && grep -Fq '"event": "tls_proxy_connected"' "$proxy" && grep -Fq '"tls_version":' "$proxy"; then result PASS 'external TLS transport evidence'; else result PENDING 'external TLS transport evidence'; fi
+if [[ -f "$tlsfixture" ]] && grep -Fq '"event": "tls_irc_registered"' "$tlsfixture" && grep -Fq '"event": "tls_irc_pong"' "$tlsfixture"; then result PASS 'IRC session traversed delegated TLS transport'; else result PENDING 'IRC session traversed delegated TLS transport'; fi
 
 # Known fixture placeholder/secret strings must never appear in evidence logs.
 if grep -R -F -q 'M9_2_SECRET' "$ev" 2>/dev/null; then result FAIL 'placeholder secret absent from evidence'; else result PASS 'placeholder secret absent from evidence'; fi
