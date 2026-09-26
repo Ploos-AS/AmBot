@@ -4,9 +4,9 @@ endif
 CFLAGS ?= -Os -Wall -Wextra -Werror -m68000 -Iinclude
 LDFLAGS ?=
 TARGET := AmBot
-SOURCES := src/main.c src/net.c src/irc.c src/events.c src/commands.c src/operations.c src/rexx.c src/hooks.c src/config.c src/modules.c src/networks.c src/modernirc.c src/multinet.c src/session.c
+SOURCES := src/main.c src/net.c src/irc.c src/events.c src/commands.c src/operations.c src/rexx.c src/hooks.c src/config.c src/modules.c src/networks.c src/modernirc.c src/multinet.c src/botai.c src/session.c
 OBJECTS := $(SOURCES:.c=.o)
-HEADERS := include/ambot.h include/net.h include/irc.h include/events.h include/commands.h include/operations.h include/rexx.h include/hooks.h include/config.h include/modules.h include/networks.h include/modernirc.h include/multinet.h include/session.h
+HEADERS := include/ambot.h include/net.h include/irc.h include/events.h include/commands.h include/operations.h include/rexx.h include/hooks.h include/config.h include/modules.h include/networks.h include/modernirc.h include/multinet.h include/botai.h include/session.h
 
 .PHONY: all clean check amiga qualify-m9_2 check-m9_2 preflight-m9_2 review-m9_2-evidence run-m9_2-host run-m9_2-tls check-m9_3 audit-m9_3 package-m9_3 prepare-publish-m9_3 publish-preflight-m9_3
 
