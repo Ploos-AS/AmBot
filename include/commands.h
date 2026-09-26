@@ -2,6 +2,7 @@
 #define AMBOT_COMMANDS_H
 
 #include "events.h"
+#include "botai.h"
 
 enum ambot_permission {
     AMBOT_PERMISSION_USER = 0,
@@ -12,6 +13,7 @@ struct ambot_command_context {
     int sock;
     const char *bot_nick;
     const char *owner_nick;
+    struct ambot_botai *botai;
 };
 
 void ambot_commands_handle_event(const struct ambot_event *event, void *userdata);
