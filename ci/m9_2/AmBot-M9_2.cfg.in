@@ -1,0 +1,24 @@
+# Generated template for AmBot M9.2.
+# Replace HOST_IP with the host reachable from the Amiga guest.
+OWNER=Tester
+HOOK_DIR=REXX:AmBot/M9_2
+
+[NETWORK alpha]
+HOST=HOST_IP
+PORT=17667
+NICK=AmBotA
+USER=ambot
+CAP=ON
+SASL=PLAIN
+SASL_USER=m9user
+SASL_PASS=M9_2_SECRET
+CHANNEL=#m9-alpha
+
+[NETWORK beta]
+HOST=HOST_IP
+PORT=17668
+NICK=AmBotB
+USER=ambot
+CAP=ON
+SASL=OFF
+CHANNEL=#m9-beta
