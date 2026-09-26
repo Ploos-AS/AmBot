@@ -9,7 +9,7 @@ struct ambot_irc_framer {
     unsigned char dropping;
 };
 
-typedef void (*ambot_irc_line_cb)(const char *line, void *userdata);
+typedef int (*ambot_irc_line_cb)(const char *line, void *userdata);
 
 void ambot_irc_framer_init(struct ambot_irc_framer *framer);
 void ambot_irc_framer_feed(struct ambot_irc_framer *framer,
