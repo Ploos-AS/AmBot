@@ -23,6 +23,7 @@ class Handler(socketserver.StreamRequestHandler):
         super().setup(); self.nick=None; self.user=None
         self.cap=False; self.cap_end=False; self.sasl_ok=not self.server.require_sasl
         self.registered=False; self.connection_no=0; self.drop_after_pong=False; self.isolation_probe_sent=False
+        self.post_sasl_probe_sent=False; self.send_lock=threading.Lock()
         with LOCK:
             CONNECTIONS[self.server.network]=CONNECTIONS.get(self.server.network,0)+1
             n=CONNECTIONS[self.server.network]
@@ -32,7 +33,13 @@ class Handler(socketserver.StreamRequestHandler):
             ACTIVE_HANDLERS[self.server.network]=self
         emit("connected",network=self.server.network,connection=n)
     def send(self,line):
-        self.wfile.write((line+"\r\n").encode()); self.wfile.flush()
+        with self.send_lock:
+            self.wfile.write((line+"\r\n").encode()); self.wfile.flush()
+    def maybe_post_sasl_probe(self):
+        if self.server.network!="beta" or self.post_sasl_probe_sent or not SASL_FAILURE_SEEN.is_set(): return
+        self.post_sasl_probe_sent=True
+        self.send("PING :M9_2_POST_SASL_FAILURE")
+        emit("post_sasl_failure_probe_sent",network="beta",connection=self.connection_no)
     def maybe_register(self):
         if self.registered or not self.nick or not self.user: return
         if self.cap and not self.cap_end: return
@@ -58,11 +65,8 @@ class Handler(socketserver.StreamRequestHandler):
             with LOCK:
                 survivor=ACTIVE_HANDLERS.get("beta")
             if survivor is not None:
-                try:
-                    survivor.send("PING :M9_2_POST_SASL_FAILURE")
-                    emit("post_sasl_failure_probe_sent",network="beta",connection=survivor.connection_no)
-                except Exception:
-                    emit("post_sasl_failure_probe_send_failed",network="beta")
+                try: survivor.maybe_post_sasl_probe()
+                except Exception: emit("post_sasl_failure_probe_send_failed",network="beta")
     def handle(self):
         self.send(":fixture NOTICE AUTH :AmBot M9.2 deterministic fixture")
         for raw in self.rfile:
@@ -81,6 +85,7 @@ class Handler(socketserver.StreamRequestHandler):
             elif cmd=="USER": self.user=args.split()[0]; self.maybe_register()
             elif cmd=="PONG":
                 emit("pong",network=self.server.network,connection=self.connection_no)
+                self.maybe_post_sasl_probe()
                 if self.server.network=="beta" and SASL_FAILURE_SEEN.is_set() and "M9_2_POST_SASL_FAILURE" in args:
                     emit("post_sasl_failure_survivor",network="beta",connection=self.connection_no)
                 if self.drop_after_pong:
@@ -101,6 +106,9 @@ class Handler(socketserver.StreamRequestHandler):
                 target,_,msg=args.partition(" "); emit(cmd.lower(),network=self.server.network,target=target,text=msg.lstrip(":"))
             elif cmd=="QUIT": break
     def finish(self):
+        with LOCK:
+            if ACTIVE_HANDLERS.get(self.server.network) is self:
+                ACTIVE_HANDLERS.pop(self.server.network,None)
         emit("disconnected",network=self.server.network,nick=self.nick or "unknown"); super().finish()
 
 def main():
@@ -110,7 +118,7 @@ def main():
     servers=[Server((a.bind,a.alpha_port),"alpha",a.sasl_user,a.sasl_pass,True),
              Server((a.bind,a.beta_port),"beta",a.sasl_user,a.sasl_pass,False)]
     for s in servers: threading.Thread(target=s.serve_forever,daemon=True).start()
-    emit("fixture_ready",alpha_port=a.alpha_port,beta_port=a.beta_port)
+    emit("fixture_ready",network="all",alpha_port=a.alpha_port,beta_port=a.beta_port)
     try:
         while True: time.sleep(1)
     except KeyboardInterrupt: pass
