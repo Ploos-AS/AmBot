@@ -41,6 +41,10 @@ check-m9_2:
 	@test -f ci/m9_2/rexx/ON_NOTICE.rexx
 	@test -f ci/m9_2/rexx/SASL-Failure-M9_2.rexx
 	@test -f ci/m9_2/amiga/SASL-Failure-M9_2
+	@test -f ci/m9_2/amiga/AmBNC-Plain-M9_2
+	@test -f ci/m9_2/amiga/AmBNC-TLS-M9_2
+	@test -f ci/m9_2/rexx/AmBNC-Plain-M9_2.rexx
+	@test -f ci/m9_2/rexx/AmBNC-TLS-M9_2.rexx
 	@test -f ci/m9_2/AmBNC-AmBot-M9_2.cfg.in
 	@test -f ci/m9_2/AmBNC-AmBot-TLS-M9_2.cfg.in
 	@grep -Fq "TLS_MODE=PROXY" ci/m9_2/AmBNC-AmBot-TLS-M9_2.cfg.in
