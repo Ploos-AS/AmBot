@@ -26,7 +26,8 @@ class Handler(socketserver.StreamRequestHandler):
             n=CONNECTIONS[self.server.network]
         emit("connected",network=self.server.network,connection=n)
     def send(self,line):
-        self.wfile.write((line+"\r\n").encode()); self.wfile.flush()
+        self.wfile.write((line+"\r
+                ").encode()); self.wfile.flush()
     def maybe_register(self):
         if self.registered or not self.nick or not self.user: return
         if self.cap and not self.cap_end: return
@@ -51,7 +52,8 @@ class Handler(socketserver.StreamRequestHandler):
     def handle(self):
         self.send(":fixture NOTICE AUTH :AmBot M9.2 deterministic fixture")
         for raw in self.rfile:
-            line=raw.decode("utf-8","replace").rstrip("\r\n")
+            line=raw.decode("utf-8","replace").rstrip("\r
+                ")
             cmd,_,args=line.partition(" "); cmd=cmd.upper()
             emit("rx_redacted" if cmd in ("PASS","AUTHENTICATE") else "rx",
                  network=self.server.network,command=cmd,**({} if cmd in ("PASS","AUTHENTICATE") else {"line":line}))
@@ -74,7 +76,11 @@ class Handler(socketserver.StreamRequestHandler):
                     emit("isolation_probe",network="beta",connection=self.connection_no)
             elif cmd=="JOIN" and self.nick:
                 ch=args.lstrip(":").split()[0]; self.send(":%s!ambot@fixture JOIN :%s"%(self.nick,ch))
-                self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_HOOK"%ch)\n                self.send(":fixture-user!test@fixture NOTICE %s :M9_2_FAILHOOK"%ch)\n                self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_AFTER_FAIL"%ch)\n                emit("hook_failure_sequence",network=self.server.network,channel=ch)\n                emit("join",network=self.server.network,channel=ch)
+                self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_HOOK"%ch)
+                self.send(":fixture-user!test@fixture NOTICE %s :M9_2_FAILHOOK"%ch)
+                self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_AFTER_FAIL"%ch)
+                emit("hook_failure_sequence",network=self.server.network,channel=ch)
+                emit("join",network=self.server.network,channel=ch)
             elif cmd in ("PRIVMSG","NOTICE"):
                 target,_,msg=args.partition(" "); emit(cmd.lower(),network=self.server.network,target=target,text=msg.lstrip(":"))
             elif cmd=="QUIT": break
