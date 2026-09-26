@@ -18,10 +18,10 @@ Until those conditions are met, `make package-m9_3` fails closed.
 
 The release candidate contains the qualified binary, MIT license, README,
 redistributable examples, selected architecture/milestone documentation and a
-release manifest. The archive receives its own SHA-256 sidecar.
+release manifest. The archive receives its own SHA-256 sidecar. `ci/m9_3/audit-release.sh` is then run automatically and must PASS before the candidate is reported as prepared.
 
 No ROM, AmigaOS/Workbench material, qualification credentials, private keys,
 generated test configuration or local evidence is included.
 
-Packaging does not create a Git tag or GitHub Release. Publication remains an
+The audit verifies the archive checksum, required files, release-manifest identity, packaged binary SHA-256, and rejects ROM/ADF/HDF, Workbench/Kickstart paths, private keys, credentials and local qualification/evidence material. It can also be rerun with `make audit-m9_3`.\n\nPackaging does not create a Git tag or GitHub Release. Publication remains an
 explicit later gate after the candidate contents have been reviewed.
