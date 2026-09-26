@@ -26,8 +26,7 @@ class Handler(socketserver.StreamRequestHandler):
             n=CONNECTIONS[self.server.network]
         emit("connected",network=self.server.network,connection=n)
     def send(self,line):
-        self.wfile.write((line+"\r
-                ").encode()); self.wfile.flush()
+        self.wfile.write((line+"\\r\\n").encode()); self.wfile.flush()
     def maybe_register(self):
         if self.registered or not self.nick or not self.user: return
         if self.cap and not self.cap_end: return
@@ -52,8 +51,7 @@ class Handler(socketserver.StreamRequestHandler):
     def handle(self):
         self.send(":fixture NOTICE AUTH :AmBot M9.2 deterministic fixture")
         for raw in self.rfile:
-            line=raw.decode("utf-8","replace").rstrip("\r
-                ")
+            line=raw.decode("utf-8","replace").rstrip("\\r\\n")
             cmd,_,args=line.partition(" "); cmd=cmd.upper()
             emit("rx_redacted" if cmd in ("PASS","AUTHENTICATE") else "rx",
                  network=self.server.network,command=cmd,**({} if cmd in ("PASS","AUTHENTICATE") else {"line":line}))
