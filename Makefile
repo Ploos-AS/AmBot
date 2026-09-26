@@ -8,7 +8,7 @@ SOURCES := src/main.c src/net.c src/irc.c src/events.c src/commands.c src/operat
 OBJECTS := $(SOURCES:.c=.o)
 HEADERS := include/ambot.h include/net.h include/irc.h include/events.h include/commands.h include/operations.h include/rexx.h include/hooks.h include/config.h include/modules.h include/networks.h include/modernirc.h include/multinet.h include/session.h
 
-.PHONY: all clean check amiga qualify-m9_2
+.PHONY: all clean check amiga qualify-m9_2 check-m9_2
 
 all: $(TARGET)
 
@@ -28,6 +28,13 @@ check:
 clean:
 	rm -f $(OBJECTS) $(TARGET)
 
+
+check-m9_2:
+	@python3 -m py_compile ci/m9_2/fixture_server.py
+	@test -f ci/m9_2/AmBot-M9_2.cfg.in
+	@test -f ci/m9_2/rexx/Commands-M9_2.rexx
+	@test -f ci/m9_2/rexx/ON_PRIVMSG.rexx
+	@echo "M9.2 harness static checks: PASS"
 
 amiga: all
 	@echo "AmBot native AmigaOS binary ready: $(TARGET)"
