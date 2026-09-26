@@ -1,0 +1,13 @@
+# AmBNC configuration template for AmBot M9.2 integration.
+# HOST_IP is the deterministic fixture host reachable from AmigaOS.
+
+[NETWORK ambot-gateway]
+HOST=HOST_IP
+PORT=17668
+NICK=AmBNCBotQ
+USER=ambnc
+LISTEN_PORT=16668
+BACKLOG_LINES=8
+CAP=YES
+SASL_PLAIN=NO
+TLS_MODE=PLAIN
