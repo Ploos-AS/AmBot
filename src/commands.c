@@ -108,7 +108,7 @@ void ambot_commands_handle_event(const struct ambot_event *event, void *userdata
     } else if (nick_equal(command->name, "AI")) {
         char reply[AMBOT_BOTAI_REPLY_MAX + 1];
         while (*p == ' ') ++p;
-        if (*p == '\\0') {
+        if (*p == '\0') {
             send_reply(context, target, "Usage: !AI <message>");
         } else if (context->botai == 0 || !context->botai->compatible) {
             send_reply(context, target, "BotAI is unavailable");
