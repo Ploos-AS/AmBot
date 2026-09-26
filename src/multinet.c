@@ -174,9 +174,19 @@ int ambot_multinet_run(struct ambot_networks *networks,
                     ambot_net_close_socket(runtimes[i].sock);
                     runtimes[i].sock = -1;
                     sockets[i] = -1;
-                    if (active > 0) --active;
-                    printf("AmBot: network %s disconnected\n", networks->items[i].name);
+                    printf("AmBot: network %s disconnected; attempting local reconnect\n",
+                           networks->items[i].name);
                     if (i == 0) ambot_control_set_socket(control, -1);
+                    if (connect_runtime(&runtimes[i], rexx, control) == 0) {
+                        sockets[i] = runtimes[i].sock;
+                        printf("AmBot: network %s locally reconnected\n",
+                               networks->items[i].name);
+                        if (i == 0) ambot_control_set_socket(control, runtimes[i].sock);
+                    } else {
+                        if (active > 0) --active;
+                        printf("AmBot: network %s local reconnect failed; network disabled\n",
+                               networks->items[i].name);
+                    }
                 } else {
                     struct line_context context;
                     context.runtime = &runtimes[i];
