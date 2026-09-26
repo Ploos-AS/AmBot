@@ -5,5 +5,6 @@ FailAt 20
 CD AMBOTQ:
 Echo "M9.2 permanent failure isolation phase."
 Echo "Expected: M7 networks=1 skipped=1 and survivor remains connected."
-AmBot -c AMBOTQ:AmBot-Permanent-Failure-M9_2.cfg >AMBOTQ:evidence/permanent-failure.txt
+Type AMBOTQ:M9_2-RUN-ID.txt >AMBOTQ:evidence/permanent-failure.txt
+AmBot -c AMBOTQ:AmBot-Permanent-Failure-M9_2.cfg >>AMBOTQ:evidence/permanent-failure.txt
 Echo "Permanent failure phase exited with RC $RC" >>AMBOTQ:evidence/permanent-failure.txt
