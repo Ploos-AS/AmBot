@@ -1,0 +1,7 @@
+; Keep this Shell visible. Do not redirect it: screenshots are runtime evidence.
+FailAt 20
+CD AMBOTQ:
+Echo "Starting visible AmBot M9.2 run."
+Echo "Use the second Shell for RX tests and evidence capture."
+AmBot -c AMBOTQ:AmBot-M9_2.cfg
+Echo "AmBot exited with RC $RC"
