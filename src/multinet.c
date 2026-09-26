@@ -48,8 +48,14 @@ static void handle_line(const char *line, void *userdata)
     struct ambot_event event;
 
     printf("[%s] < %s\n", runtime->config->name, line);
-    (void)ambot_modernirc_handle_line(runtime->sock, runtime->config,
-                                      &runtime->modern, line);
+    if (ambot_modernirc_handle_line(runtime->sock, runtime->config,
+                                    &runtime->modern, line) != 0) {
+        printf("AmBot: network %s modern IRC negotiation failed\n",
+               runtime->config->name);
+        ambot_net_close_socket(runtime->sock);
+        runtime->sock = -1;
+        return;
+    }
 
     if (strncmp(line, "PING ", 5) == 0) {
         char response[AMBOT_IRC_LINE_MAX + 1];
@@ -179,6 +185,13 @@ int ambot_multinet_run(struct ambot_networks *networks,
                                           (unsigned int)received,
                                           handle_line,
                                           &context);
+                    if (runtimes[i].sock < 0) {
+                        sockets[i] = -1;
+                        if (active > 0) --active;
+                        printf("AmBot: network %s disabled after negotiation failure\n",
+                               networks->items[i].name);
+                        if (i == 0) ambot_control_set_socket(control, -1);
+                    }
                 }
             }
         }
