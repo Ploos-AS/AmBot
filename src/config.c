@@ -76,6 +76,8 @@ void ambot_config_init(struct ambot_config *config)
     config->cap_enabled = 1;
     copy_value(config->hook_dir, sizeof(config->hook_dir), "REXX:AmBot");
     copy_value(config->module_dir, sizeof(config->module_dir), "REXX:AmBot/Modules");
+    copy_value(config->botai_expert, sizeof(config->botai_expert), "auto");
+    config->botai_timeout_seconds = 30;
 }
 
 void ambot_config_seed(struct ambot_config *config,
@@ -188,6 +190,9 @@ int ambot_config_load(struct ambot_config *config, const char *path)
         else if (key_equal(key, "SASL_USER")) copy_value(config->sasl_user, sizeof(config->sasl_user), value);
         else if (key_equal(key, "SASL_PASS")) copy_value(config->sasl_pass, sizeof(config->sasl_pass), value);
         else if (key_equal(key, "TLS")) config->tls_upstream = key_equal(value, "UPSTREAM") ? 1 : 0;
+        else if (key_equal(key, "BOTAI_URL")) copy_value(config->botai_url, sizeof(config->botai_url), value);
+        else if (key_equal(key, "BOTAI_EXPERT")) copy_value(config->botai_expert, sizeof(config->botai_expert), value);
+        else if (key_equal(key, "BOTAI_TIMEOUT")) config->botai_timeout_seconds = parse_port(value, config->botai_timeout_seconds);
         else if (key_equal(key, "CHANNEL") && config->channel_count < AMBOT_CONFIG_CHANNELS_MAX) {
             copy_value(config->channels[config->channel_count], sizeof(config->channels[0]), value);
             ++config->channel_count;
