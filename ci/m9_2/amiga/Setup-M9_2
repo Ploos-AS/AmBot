@@ -7,8 +7,8 @@ EndIf
 If NOT EXISTS REXX:AmBot/M9_2
   MakeDir REXX:AmBot/M9_2
 EndIf
-Copy AMBOTQ:M9_2/ON_PRIVMSG.rexx REXX:AmBot/M9_2/ON_PRIVMSG.rexx
+Copy AMBOTQ:M9_2/ON_PRIVMSG.rexx REXX:AmBot/ON_PRIVMSG.rexx\nCopy AMBOTQ:M9_2/ON_NOTICE.rexx REXX:AmBot/ON_NOTICE.rexx
 Delete AMBOTQ:evidence/hooks.log QUIET
-Echo "M9.2 hook installed under REXX:AmBot/M9_2"
+Echo "M9.2 hooks installed under REXX:AmBot"
 Echo "Start RexxMast if it is not already running."
 Echo "Open a second Shell, then run AMBOTQ:Start-M9_2 here."
