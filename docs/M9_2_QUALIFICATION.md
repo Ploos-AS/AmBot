@@ -69,3 +69,27 @@ attest that licensed AmigaOS 2.04+ was visibly running, identify the actual
 TCP/IP stack, review screenshots, or judge the manual isolation/shutdown gates.
 Any machine-detected FAIL must be resolved before an operator can mark M9.2
 PASS.
+
+## Operator sequence
+
+Use three visible terminals/shells so host infrastructure and Amiga runtime
+evidence remain distinct.
+
+1. Build and prepare locally:
+   `M9_2_SYSTEM_DIR=/licensed/system M9_2_KICKSTART_FILE=/licensed/kick.rom make qualify-m9_2`
+2. On the host, start the deterministic fixture and leave it running:
+   `M9_2_HOST_IP=<host-address-visible-to-AmigaOS> make run-m9_2-host`
+3. Launch the generated `build/m9_2/AmBot-M9_2.fs-uae` visibly.
+4. In the first AmigaShell run `AMBOTQ:Setup-M9_2`, then `AMBOTQ:Start-M9_2`.
+5. In the second AmigaShell run `RX AMBOTQ:M9_2/Commands-M9_2.rexx` and capture
+   its output to `AMBOTQ:evidence/rexx-commands.txt` as part of the visible
+   procedure.
+6. Exercise reconnect, hook failure isolation and the separate AmBNC-backed
+   path described in `AMBNC_INTEGRATION.md`.
+7. Run `AMBOTQ:Snapshot-M9_2`.
+8. Run `RX AMBOTQ:M9_2/Shutdown-M9_2.rexx`.
+9. Stop the host fixture with Ctrl-C and run `make review-m9_2-evidence`.
+
+The host runner generates its SASL credential under ignored `build/m9_2/host`
+with restrictive permissions and generates the guest config locally. Never
+commit either generated file.
