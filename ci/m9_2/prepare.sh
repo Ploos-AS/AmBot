@@ -21,6 +21,7 @@ cp "$ROOT/ci/m9_2/AmBot-Permanent-Failure-M9_2.cfg.in" "$OUT/AmBot/AmBot-Permane
 cp "$ROOT/ci/m9_2/AmBNC-AmBot-M9_2.cfg.in" "$OUT/AmBot/AmBNC-AmBot-M9_2.cfg.in"
 cp "$ROOT/ci/m9_2/AmBNC-AmBot-TLS-M9_2.cfg.in" "$OUT/AmBot/AmBNC-AmBot-TLS-M9_2.cfg.in"
 cp "$ROOT/ci/m9_2/AmBot-via-AmBNC-M9_2.cfg" "$OUT/AmBot/AmBot-via-AmBNC-M9_2.cfg"
+cp "$ROOT/ci/m9_2/AmBot-via-AmBNC-TLS-M9_2.cfg" "$OUT/AmBot/AmBot-via-AmBNC-TLS-M9_2.cfg"
 cp "$ROOT/ci/m9_2/AMBNC_INTEGRATION.md" "$OUT/AmBot/AMBNC_INTEGRATION.md"
 cp "$ROOT/ci/m9_2/rexx/"*.rexx "$OUT/AmBot/M9_2/"
 cp "$ROOT/ci/m9_2/amiga/"* "$OUT/AmBot/"
