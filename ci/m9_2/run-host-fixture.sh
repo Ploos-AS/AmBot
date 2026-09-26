@@ -6,6 +6,14 @@ ev="$out/AmBot/evidence"
 envf="$host/fixture.env"
 mkdir -p "$host" "$ev"
 
+manifest="$ev/MANIFEST.txt"
+[[ -f "$manifest" ]] || { echo "ERROR: missing M9.2 manifest; run make qualify-m9_2 first" >&2; exit 2; }
+run_id=$(sed -n 's/^run_id=//p' "$manifest")
+source_commit=$(sed -n 's/^commit=//p' "$manifest")
+binary_sha=$(sed -n 's/^binary_sha256=//p' "$manifest")
+[[ -n "$run_id" && "$run_id" != unknown && -n "$source_commit" && "$source_commit" != unknown && -n "$binary_sha" ]] || { echo "ERROR: incomplete M9.2 run identity" >&2; exit 2; }
+identity_json=$(printf '{"event":"qualification_identity","run_id":"%s","commit":"%s","binary_sha256":"%s"}' "$run_id" "$source_commit" "$binary_sha")
+
 if [[ ! -f "$envf" ]]; then
   umask 077
   secret="$(python3 -c 'import secrets; print(secrets.token_urlsafe(24))')"
@@ -45,6 +53,7 @@ chmod 600 "$permanent_cfg"
 
 log="$ev/host-fixture.jsonl"
 : >"$log"
+printf '%s\n' "$identity_json" >>"$log"
 python3 ci/m9_2/fixture_server.py --bind "$M9_2_BIND"   --alpha-port "$M9_2_ALPHA_PORT" --beta-port "$M9_2_BETA_PORT"   --sasl-user "$M9_2_SASL_USER" --sasl-pass "$M9_2_SASL_PASS" >>"$log" 2>&1 &
 pid=$!
 echo "$pid" >"$host/fixture.pid"
