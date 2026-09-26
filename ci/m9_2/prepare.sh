@@ -24,6 +24,7 @@ cp "$ROOT/ci/m9_2/rexx/"*.rexx "$OUT/AmBot/M9_2/"
 cp "$ROOT/ci/m9_2/amiga/"* "$OUT/AmBot/"
 cp "$ROOT/ci/m9_2/QUALIFICATION_CHECKLIST.md" "$OUT/AmBot/evidence/QUALIFICATION_CHECKLIST.md"
 if command -v sha256sum >/dev/null 2>&1; then sha256sum "$OUT/AmBot/AmBot" > "$OUT/AmBot/evidence/AmBot.sha256"; fi
+M9_2_OUT="$OUT" sh "$ROOT/ci/m9_2/write-manifest.sh"
 cat > "$OUT/README.txt" <<'EOF'
 AmBot M9.2 local qualification bundle.
 This directory contains only redistributable AmBot material.
