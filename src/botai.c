@@ -142,8 +142,11 @@ int ambot_botai_check(struct ambot_botai *botai)
         return -1;
     }
     body = http_body(response);
-    if (body == 0 || (strcmp(body, "{\"api_version\":\"1.0.0\"}\\n") != 0 &&\n                      strcmp(body, "{\"api_version\":\"1.0.0\"}") != 0)) {
-        botai->compatible = 0; return -1;
+    if (body == 0 ||
+        (strcmp(body, "{\"api_version\":\"1.0.0\"}\\n") != 0 &&
+         strcmp(body, "{\"api_version\":\"1.0.0\"}") != 0)) {
+        botai->compatible = 0;
+        return -1;
     }
     botai->compatible = 1;
     return 0;
