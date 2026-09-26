@@ -4,5 +4,6 @@
 FailAt 20
 CD AMBOTQ:
 Echo "M9.2 SASL failure isolation phase."
-AmBot -c AMBOTQ:AmBot-SASL-Failure-M9_2.cfg >AMBOTQ:evidence/sasl-failure.txt
+Type AMBOTQ:M9_2-RUN-ID.txt >AMBOTQ:evidence/sasl-failure.txt
+AmBot -c AMBOTQ:AmBot-SASL-Failure-M9_2.cfg >>AMBOTQ:evidence/sasl-failure.txt
 Echo "SASL failure phase exited with RC $RC" >>AMBOTQ:evidence/sasl-failure.txt
