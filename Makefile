@@ -45,6 +45,10 @@ check-m9_2:
 	@test -f ci/m9_2/AmBNC-AmBot-TLS-M9_2.cfg.in
 	@grep -Fq "TLS_MODE=PROXY" ci/m9_2/AmBNC-AmBot-TLS-M9_2.cfg.in
 	@test -f ci/m9_2/AmBot-via-AmBNC-M9_2.cfg
+	@grep -Fq "TLS=OFF" ci/m9_2/AmBot-via-AmBNC-M9_2.cfg
+	@test -f ci/m9_2/AmBot-via-AmBNC-TLS-M9_2.cfg
+	@grep -Fq "AMBNC_PORT=16669" ci/m9_2/AmBot-via-AmBNC-TLS-M9_2.cfg
+	@grep -Fq "TLS=UPSTREAM" ci/m9_2/AmBot-via-AmBNC-TLS-M9_2.cfg
 	@test -f ci/m9_2/AMBNC_INTEGRATION.md
 	@grep -Fq "typedef int (*ambot_irc_line_cb)" include/irc.h
 	@grep -Fq "if (runtime->sock < 0) return 1;" src/multinet.c
