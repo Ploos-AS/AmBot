@@ -28,7 +28,11 @@ void ambot_irc_framer_feed(struct ambot_irc_framer *framer,
                     --framer->length;
                 }
                 framer->line[framer->length] = '\0';
-                callback(framer->line, userdata);
+                if (callback(framer->line, userdata) != 0) {
+                    framer->length = 0;
+                    framer->dropping = 0;
+                    return;
+                }
             }
             framer->length = 0;
             framer->dropping = 0;
