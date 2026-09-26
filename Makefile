@@ -23,7 +23,12 @@ check:
 	@test -f include/modernirc.h
 	@test -f docs/M8.md
 	@test -f examples/AmBot-Modern.cfg
-	@echo "M8 static checks: PASS"
+	@test -f src/botai.c
+	@test -f include/botai.h
+	@grep -Fq "BOTAI_URL" src/config.c
+	@grep -Fq "\"AI\"" src/commands.c
+	@grep -Fq "AMBOT_BOTAI_RESPONSE_MAX" include/botai.h
+	@echo "M8 + optional BotAI static checks: PASS"
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
