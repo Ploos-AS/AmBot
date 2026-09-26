@@ -1,0 +1,11 @@
+[fs-uae]
+amiga_model = A1200
+cpu = 68020
+accuracy = -1
+uae_cpu_speed = max
+bsdsocket_library = 1
+fullscreen = 0
+hard_drive_0 = @SYSTEM_DIR@
+hard_drive_1 = @BUNDLE_DIR@
+hard_drive_1_label = AMBOTQ
+kickstart_file = @KICKSTART_FILE@
