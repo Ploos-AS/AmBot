@@ -65,14 +65,30 @@ event forced_drop alpha 'alpha deterministic disconnect'
 if [[ -f "$fixture" ]] && grep -F '"event": "registered"' "$fixture" | grep -F '"network": "alpha"' | grep -Fq '"connection": 2' && grep -F '"event": "pong"' "$fixture" | grep -F '"network": "alpha"' | grep -Fq '"connection": 2'; then result PASS 'alpha reconnect registered and live'; else result PENDING 'alpha reconnect registered and live'; fi
 event isolation_probe beta 'beta remains live during alpha fault'
 if phase_identity permanent-failure.txt 'permanent failure phase' && grep -Fq 'M7 networks=1 skipped=1' "$ev/permanent-failure.txt" && grep -Fq 'network survivor connected' "$ev/permanent-failure.txt"; then result PASS 'invalid security network skipped; survivor operational'; else result PENDING 'invalid security network skipped; survivor operational'; fi
+phase_identity rexx-commands.txt 'ARexx command phase' || true
 marker rexx-commands.txt 'M9.2 STATUS RC=0' 'ARexx STATUS'
 marker rexx-commands.txt 'M9.2 JOIN RC=0' 'ARexx JOIN'
 marker rexx-commands.txt 'M9.2 MSG RC=0' 'ARexx MSG'
 marker rexx-commands.txt 'M9.2 NOTICE RC=0' 'ARexx NOTICE'
 marker rexx-commands.txt 'M9.2 RELOAD RC=0' 'ARexx RELOAD request'
-if [[ -s "$ev/hooks.log" ]] && grep -Fq 'M9.2 HOOK' "$ev/hooks.log"; then result PASS 'ON_PRIVMSG hook evidence'; else result PENDING 'ON_PRIVMSG hook evidence'; fi
-if [[ -s "$ev/hooks.log" ]] && grep -Fq 'M9.2 FAILHOOK' "$ev/hooks.log" && grep -Fq 'M9_2_AFTER_FAIL' "$ev/hooks.log"; then result PASS 'hook failure isolation'; else result PENDING 'hook failure isolation'; fi
-if [[ -f "$ev/ambnc.txt" ]] && grep -Fq 'AmBot=' "$ev/ambnc.txt" && grep -Fq 'AmBNC=' "$ev/ambnc.txt"; then result PASS 'AmBNC integration commit evidence'; else result PENDING 'AmBNC integration commit evidence'; fi
+if phase_identity hooks.log 'ARexx hook phase' && grep -Fq 'M9.2 HOOK' "$ev/hooks.log"; then result PASS 'ON_PRIVMSG hook evidence'; else result PENDING 'ON_PRIVMSG hook evidence'; fi
+if phase_identity hooks.log 'ARexx hook failure phase' && grep -Fq 'M9.2 FAILHOOK' "$ev/hooks.log" && grep -Fq 'M9_2_AFTER_FAIL' "$ev/hooks.log"; then result PASS 'hook failure isolation'; else result PENDING 'hook failure isolation'; fi
+if phase_identity ambnc.txt 'AmBNC identity record' && grep -Eq '^AmBNC=[0-9a-fA-F]{7,40}
+if phase_identity ambnc-plain.txt 'AmBNC plaintext phase' && grep -Fq 'network via-ambnc connected' "$ev/ambnc-plain.txt"; then result PASS 'AmBot plaintext session through real AmBNC'; else result PENDING 'AmBot plaintext session through real AmBNC'; fi
+if phase_identity ambnc-tls.txt 'AmBNC TLS phase' && grep -Fq 'network via-ambnc-tls connected' "$ev/ambnc-tls.txt" && [[ -f "$proxy" ]] && grep -Fq '"event": "tls_proxy_connected"' "$proxy" && grep -Fq '"tls_version":' "$proxy" && [[ -f "$tlsfixture" ]] && grep -Fq '"event": "tls_irc_registered"' "$tlsfixture" && grep -Fq '"event": "tls_irc_pong"' "$tlsfixture"; then result PASS 'AmBot session traversed real AmBNC delegated TLS path'; else result PENDING 'AmBot session traversed real AmBNC delegated TLS path'; fi
+if [[ -f "$proxy" ]] && grep -Fq '"event": "tls_proxy_connected"' "$proxy" && grep -Fq '"tls_version":' "$proxy"; then result PASS 'external TLS transport evidence'; else result PENDING 'external TLS transport evidence'; fi
+if [[ -f "$tlsfixture" ]] && grep -Fq '"event": "tls_irc_registered"' "$tlsfixture" && grep -Fq '"event": "tls_irc_pong"' "$tlsfixture"; then result PASS 'IRC session traversed delegated TLS transport'; else result PENDING 'IRC session traversed delegated TLS transport'; fi
+
+# Known fixture placeholder/secret strings must never appear in evidence logs.
+if grep -R -F -q 'M9_2_SECRET' "$ev" 2>/dev/null; then result FAIL 'placeholder secret absent from evidence'; else result PASS 'placeholder secret absent from evidence'; fi
+
+echo
+echo "PASS=$pass PENDING=$pending FAIL=$fail"
+echo 'OVERALL=PENDING'
+echo 'Reason: licensed visible AmigaOS execution, environment identity, screenshots,'
+echo 'hook-failure isolation and operator-reviewed checklist cannot be inferred here.'
+[[ "$fail" -eq 0 ]]
+ "$ev/ambnc.txt"; then result PASS 'AmBNC integration commit evidence'; else result PENDING 'AmBNC integration commit evidence'; fi
 if phase_identity ambnc-plain.txt 'AmBNC plaintext phase' && grep -Fq 'network via-ambnc connected' "$ev/ambnc-plain.txt"; then result PASS 'AmBot plaintext session through real AmBNC'; else result PENDING 'AmBot plaintext session through real AmBNC'; fi
 if phase_identity ambnc-tls.txt 'AmBNC TLS phase' && grep -Fq 'network via-ambnc-tls connected' "$ev/ambnc-tls.txt" && [[ -f "$proxy" ]] && grep -Fq '"event": "tls_proxy_connected"' "$proxy" && grep -Fq '"tls_version":' "$proxy" && [[ -f "$tlsfixture" ]] && grep -Fq '"event": "tls_irc_registered"' "$tlsfixture" && grep -Fq '"event": "tls_irc_pong"' "$tlsfixture"; then result PASS 'AmBot session traversed real AmBNC delegated TLS path'; else result PENDING 'AmBot session traversed real AmBNC delegated TLS path'; fi
 if [[ -f "$proxy" ]] && grep -Fq '"event": "tls_proxy_connected"' "$proxy" && grep -Fq '"tls_version":' "$proxy"; then result PASS 'external TLS transport evidence'; else result PENDING 'external TLS transport evidence'; fi
