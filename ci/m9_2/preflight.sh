@@ -36,7 +36,7 @@ for jf in host-fixture.jsonl tls-proxy.jsonl tls-fixture.jsonl; do
        grep -F '"event":"qualification_identity"' "$jp" | grep -Fq "\"binary_sha256\":\"$manifest_sha\""; then r PASS "$jf run identity"; else r FAIL "$jf belongs to another run"; fi
   fi
 done
-for phase in sasl-failure permanent-failure ambnc-plain ambnc-tls; do
+for phase in sasl-failure permanent-failure ambnc-plain ambnc-tls rexx-commands hooks ambnc; do
   pf="$out/AmBot/evidence/$phase.txt"
   if [[ -f "$pf" ]]; then
     if [[ -n "$manifest_run" ]] && grep -Fxq "RUN_ID=$manifest_run" "$pf"; then r PASS "$phase transcript run identity"; else r FAIL "$phase transcript belongs to another run"; fi
