@@ -142,7 +142,7 @@ int ambot_botai_check(struct ambot_botai *botai)
         return -1;
     }
     body = http_body(response);
-    if (body == 0 || strcmp(body, "{\"api_version\":\"1.0.0\"}") != 0) {
+    if (body == 0 || (strcmp(body, "{\"api_version\":\"1.0.0\"}\\n") != 0 &&\n                      strcmp(body, "{\"api_version\":\"1.0.0\"}") != 0)) {
         botai->compatible = 0; return -1;
     }
     botai->compatible = 1;
@@ -172,9 +172,10 @@ static int parse_text_response(const char *body, char *reply, unsigned int reply
 {
     const char *p;
     unsigned int used = 0;
-    if (body == 0 || reply == 0 || reply_size == 0) return -1;
-    if (strncmp(body, "{\"text\":\"", 9) != 0) return -1;
-    p = body + 9;
+    if (body == 0 || reply == 0 || reply_size == 0 || body[0] != '{') return -1;
+    p = strstr(body, "\"text\":\"");
+    if (p == 0) return -1;
+    p += 8;
     while (*p != '\0' && *p != '"') {
         char ch = *p++;
         if (ch == '\\') {
@@ -185,10 +186,9 @@ static int parse_text_response(const char *body, char *reply, unsigned int reply
         if (used + 1 >= reply_size) return -1;
         reply[used++] = ch;
     }
-    if (*p++ != '"') return -1;
-    if (*p++ != '}' || *p != '\0') return -1;
+    if (*p != '"' || used == 0) return -1;
     reply[used] = '\0';
-    return used != 0 ? 0 : -1;
+    return 0;
 }
 
 int ambot_botai_chat(struct ambot_botai *botai, const char *message,
