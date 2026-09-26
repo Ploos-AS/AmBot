@@ -10,6 +10,14 @@ event(){ if [[ -f "$fixture" ]] && grep -Fq "\"event\": \"$1\"" "$fixture" && gr
 marker(){ if [[ -f "$ev/$1" ]] && grep -Fq "$2" "$ev/$1"; then result PASS "$3"; else result PENDING "$3"; fi; }
 
 echo 'AmBot M9.2 evidence summary (advisory; operator checklist is authoritative)'
+manifest="$ev/MANIFEST.txt"
+if [[ -f "$manifest" ]] && [[ -f "$out/AmBot/AmBot" ]] && command -v sha256sum >/dev/null 2>&1; then
+  expected=$(sed -n 's/^binary_sha256=//p' "$manifest")
+  actual=$(sha256sum "$out/AmBot/AmBot" | awk '{print $1}')
+  if [[ -n "$expected" && "$expected" == "$actual" ]]; then result PASS 'qualified binary matches manifest SHA-256'; else result FAIL 'qualified binary matches manifest SHA-256'; fi
+else
+  result PENDING 'qualified binary matches manifest SHA-256'
+fi
 event fixture_ready all 'host fixture started'
 event registered alpha 'alpha IRC registration'
 event registered beta 'beta IRC registration'
