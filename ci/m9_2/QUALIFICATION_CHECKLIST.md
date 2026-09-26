@@ -14,7 +14,7 @@ from static inspection or the M9.1 AROS run.
 | AMBOT ARexx STATUS | PENDING | |
 | ARexx JOIN / MSG / NOTICE | PENDING | |
 | ON_PRIVMSG hook | PENDING | |
-| hook failure isolation | PENDING | |
+| hook failure isolation | PENDING | ON_NOTICE returns RC 10; later M9_2_AFTER_FAIL PRIVMSG is still handled |
 | config reload | PENDING | |
 | two simultaneous networks | PENDING | beta isolation_probe while alpha reconnects |
 | AmBNC-backed network | PENDING | Record AmBot + AmBNC commits and fixture transcript |
