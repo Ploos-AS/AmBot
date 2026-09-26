@@ -1,0 +1,7 @@
+; Record real AmBNC identity for this exact qualification run.
+; Usage: Execute AMBOTQ:Record-AmBNC-M9_2 <AmBNC-commit>
+.KEY AMBNCCOMMIT/A
+FailAt 20
+Type AMBOTQ:M9_2-RUN-ID.txt >AMBOTQ:evidence/ambnc.txt
+Echo "AmBNC=<AMBNCCOMMIT>" >>AMBOTQ:evidence/ambnc.txt
+Echo "AmBNC identity recorded for current M9.2 run."
