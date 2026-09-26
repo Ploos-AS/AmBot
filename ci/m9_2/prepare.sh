@@ -11,7 +11,7 @@ cp "$ROOT/examples/AmBot.cfg" "$OUT/AmBot/AmBot.cfg"
 cp "$ROOT/examples/AmBot-Multi.cfg" "$OUT/AmBot/AmBot-Multi.cfg"
 cp "$ROOT/examples/AmBot-Modern.cfg" "$OUT/AmBot/AmBot-Modern.cfg"
 cp "$ROOT/examples/ambot.rexx" "$OUT/AmBot/ambot.rexx"
-cp "$ROOT/examples/ON_PRIVMSG.rexx" "$OUT/AmBot/ON_PRIVMSG.rexx"
+cp "$ROOT/examples/ON_PRIVMSG.rexx" "$OUT/AmBot/ON_PRIVMSG.rexx"\ncp "$ROOT/ci/m9_2/AmBot-M9_2.cfg.in" "$OUT/AmBot/AmBot-M9_2.cfg.in"\nmkdir -p "$OUT/AmBot/M9_2"\ncp "$ROOT/ci/m9_2/rexx/"*.rexx "$OUT/AmBot/M9_2/"
 cp "$ROOT/ci/m9_2/QUALIFICATION_CHECKLIST.md" "$OUT/evidence/QUALIFICATION_CHECKLIST.md"
 
 if command -v sha256sum >/dev/null 2>&1; then
