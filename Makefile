@@ -31,13 +31,16 @@ clean:
 
 check-m9_2:
 	@python3 -m py_compile ci/m9_2/fixture_server.py ci/m9_2/tls_proxy.py ci/m9_2/tls_fixture.py
-	@test -f ci/m9_2/AmBot-M9_2.cfg.in\n\t@test -f ci/m9_2/AmBot-SASL-Failure-M9_2.cfg.in
+	@test -f ci/m9_2/AmBot-M9_2.cfg.in
+	@test -f ci/m9_2/AmBot-SASL-Failure-M9_2.cfg.in
 	@test -f ci/m9_2/rexx/Commands-M9_2.rexx
-	@test -f ci/m9_2/rexx/ON_PRIVMSG.rexx\n\t@test -f ci/m9_2/rexx/ON_NOTICE.rexx
+	@test -f ci/m9_2/rexx/ON_PRIVMSG.rexx
+	@test -f ci/m9_2/rexx/ON_NOTICE.rexx
 	@test -f ci/m9_2/AmBNC-AmBot-M9_2.cfg.in
 	@test -f ci/m9_2/AmBot-via-AmBNC-M9_2.cfg
 	@test -f ci/m9_2/AMBNC_INTEGRATION.md
-	@test -f ci/m9_2/summarize-evidence.sh\n\t@test -f ci/m9_2/amigaos-template.fs-uae
+	@test -f ci/m9_2/summarize-evidence.sh
+	@test -f ci/m9_2/amigaos-template.fs-uae
 	@echo "M9.2 harness static checks: PASS"
 
 amiga: all
