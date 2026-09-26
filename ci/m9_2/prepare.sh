@@ -2,6 +2,12 @@
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)
 OUT="${M9_2_OUT:-$ROOT/build/m9_2}"
+if [ -n "${M9_2_SYSTEM_DIR:-}" ] && [ -n "${M9_2_KICKSTART_FILE:-}" ]; then
+  sed -e "s|@SYSTEM_DIR@|$M9_2_SYSTEM_DIR|g" \
+      -e "s|@BUNDLE_DIR@|$OUT/AmBot|g" \
+      -e "s|@KICKSTART_FILE@|$M9_2_KICKSTART_FILE|g" \
+      "$ROOT/ci/m9_2/amigaos-template.fs-uae" > "$OUT/AmBot-M9_2.fs-uae"
+fi
 mkdir -p "$OUT/AmBot/M9_2" "$OUT/evidence"
 cp "$ROOT/AmBot" "$OUT/AmBot/AmBot"
 cp "$ROOT/examples/AmBot.cfg" "$OUT/AmBot/AmBot.cfg"
