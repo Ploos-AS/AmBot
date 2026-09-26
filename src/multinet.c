@@ -45,12 +45,13 @@ static void dispatch_event(const struct ambot_event *event, void *userdata)
     ambot_hooks_dispatch_event(event, &runtime->hooks);
 }
 
-static void handle_line(const char *line, void *userdata)
+static int handle_line(const char *line, void *userdata)
 {
     struct line_context *context = (struct line_context *)userdata;
     struct network_runtime *runtime = context->runtime;
     struct ambot_event event;
 
+    if (runtime->sock < 0) return 1;
     printf("[%s] < %s\n", runtime->config->name, line);
     if (ambot_modernirc_handle_line(runtime->sock, runtime->config,
                                     &runtime->modern, line) != 0) {
@@ -58,7 +59,7 @@ static void handle_line(const char *line, void *userdata)
                runtime->config->name);
         ambot_net_close_socket(runtime->sock);
         runtime->sock = -1;
-        return;
+        return 1;
     }
 
     if (strncmp(line, "PING ", 5) == 0) {
@@ -66,13 +67,14 @@ static void handle_line(const char *line, void *userdata)
         int written = snprintf(response, sizeof(response), "PONG %s", line + 5);
         if (written > 0 && written < (int)sizeof(response))
             (void)ambot_irc_send_line(runtime->sock, response);
-        return;
+        return 0;
     }
 
     if (ambot_event_from_irc_line(line, &event)) {
         if (ambot_event_queue_push(&runtime->events, &event) == 0)
             ambot_event_dispatch_pending(&runtime->events, dispatch_event, runtime);
     }
+    return runtime->sock < 0 ? 1 : 0;
 }
 
 static int connect_runtime(struct network_runtime *runtime,
