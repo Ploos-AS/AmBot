@@ -20,7 +20,7 @@ class Handler(socketserver.StreamRequestHandler):
     def setup(self):
         super().setup(); self.nick=None; self.user=None
         self.cap=False; self.cap_end=False; self.sasl_ok=not self.server.require_sasl
-        self.registered=False
+        self.registered=False; self.connection_no=0; self.drop_after_pong=False
         with LOCK:
             CONNECTIONS[self.server.network]=CONNECTIONS.get(self.server.network,0)+1
             n=CONNECTIONS[self.server.network]
@@ -64,7 +64,14 @@ class Handler(socketserver.StreamRequestHandler):
             elif cmd=="AUTHENTICATE": self.auth(args)
             elif cmd=="NICK": self.nick=args.lstrip(":").split()[0]; self.maybe_register()
             elif cmd=="USER": self.user=args.split()[0]; self.maybe_register()
-            elif cmd=="PONG": emit("pong",network=self.server.network)
+            elif cmd=="PONG":
+                emit("pong",network=self.server.network,connection=self.connection_no)
+                if self.drop_after_pong:
+                    emit("forced_drop",network=self.server.network,connection=self.connection_no)
+                    return
+                if self.server.network=="beta":
+                    self.send("PING :M9_2_BETA_STILL_ALIVE")
+                    emit("isolation_probe",network="beta",connection=self.connection_no)
             elif cmd=="JOIN" and self.nick:
                 ch=args.lstrip(":").split()[0]; self.send(":%s!ambot@fixture JOIN :%s"%(self.nick,ch))
                 self.send(":fixture-user!test@fixture PRIVMSG %s :M9_2_HOOK"%ch); emit("join",network=self.server.network,channel=ch)
