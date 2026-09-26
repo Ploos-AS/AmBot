@@ -30,6 +30,12 @@ if [[ -z "$host_ip" ]]; then
 fi
 sed -e "s|HOST_IP|$host_ip|g" -e "s|M9_2_SECRET|$M9_2_SASL_PASS|g"   "$out/AmBot/AmBot-M9_2.cfg.in" >"$cfg"
 chmod 600 "$cfg"
+fail_cfg="$out/AmBot/AmBot-SASL-Failure-M9_2.cfg"
+if [[ ! -f "$out/AmBot/AmBot-SASL-Failure-M9_2.cfg.in" ]]; then
+  echo "ERROR: missing SASL failure profile; run make qualify-m9_2 first" >&2; exit 2
+fi
+sed -e "s|HOST_IP|$host_ip|g" "$out/AmBot/AmBot-SASL-Failure-M9_2.cfg.in" >"$fail_cfg"
+chmod 600 "$fail_cfg"
 
 log="$ev/host-fixture.jsonl"
 : >"$log"
@@ -44,6 +50,7 @@ if ! kill -0 "$pid" 2>/dev/null; then echo "ERROR: fixture failed to start" >&2;
 echo "M9.2 host fixture ready."
 echo "  IRC evidence: $log"
 echo "  Guest config: $cfg"
+echo "  SASL failure phase: $fail_cfg"
 echo "  Host address: $host_ip"
 echo "Leave this running during the visible FS-UAE/AmigaOS test."
 echo "Press Ctrl-C only after Snapshot-M9_2 and Shutdown-M9_2.rexx."
