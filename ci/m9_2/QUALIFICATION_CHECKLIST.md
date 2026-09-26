@@ -10,13 +10,13 @@ from static inspection or the M9.1 AROS run.
 | AmBot native launch | PENDING | |
 | bsdsocket.library available | PENDING | |
 | IRC registration/connect | PENDING | |
-| forced disconnect/reconnect | PENDING | |
+| forced disconnect/reconnect | PENDING | alpha forced_drop followed by connection 2 |
 | AMBOT ARexx STATUS | PENDING | |
 | ARexx JOIN / MSG / NOTICE | PENDING | |
 | ON_PRIVMSG hook | PENDING | |
 | hook failure isolation | PENDING | |
 | config reload | PENDING | |
-| two simultaneous networks | PENDING | |
+| two simultaneous networks | PENDING | beta isolation_probe while alpha reconnects |
 | AmBNC-backed network | PENDING | Record AmBot + AmBNC commits and fixture transcript |
 | CAP LS 302 negotiation | PENDING | |
 | SASL PLAIN success | PENDING | |
