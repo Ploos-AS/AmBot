@@ -1,0 +1,7 @@
+/* Run last from the second AmigaShell. */
+OPTIONS RESULTS
+ADDRESS AMBOT
+STATUS
+SAY "M9.2 pre-shutdown STATUS RC=" RC " RESULT=" RESULT
+QUIT
+SAY "M9.2 QUIT RC=" RC " RESULT=" RESULT
