@@ -4,5 +4,6 @@
 FailAt 20
 CD AMBOTQ:
 Echo "M9.2 AmBot -> AmBNC -> delegated TLS phase."
-AmBot -c AMBOTQ:AmBot-via-AmBNC-TLS-M9_2.cfg >AMBOTQ:evidence/ambnc-tls.txt
+Type AMBOTQ:M9_2-RUN-ID.txt >AMBOTQ:evidence/ambnc-tls.txt
+AmBot -c AMBOTQ:AmBot-via-AmBNC-TLS-M9_2.cfg >>AMBOTQ:evidence/ambnc-tls.txt
 Echo "AmBNC delegated TLS phase exited with RC $RC" >>AMBOTQ:evidence/ambnc-tls.txt
