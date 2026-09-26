@@ -33,6 +33,7 @@ event join beta 'beta channel join'
 event forced_drop alpha 'alpha deterministic disconnect'
 if [[ -f "$fixture" ]] && grep -F '"event": "registered"' "$fixture" | grep -F '"network": "alpha"' | grep -Fq '"connection": 2' && grep -F '"event": "pong"' "$fixture" | grep -F '"network": "alpha"' | grep -Fq '"connection": 2'; then result PASS 'alpha reconnect registered and live'; else result PENDING 'alpha reconnect registered and live'; fi
 event isolation_probe beta 'beta remains live during alpha fault'
+if [[ -f "$ev/permanent-failure.txt" ]] && grep -Fq 'M7 networks=1 skipped=1' "$ev/permanent-failure.txt" && grep -Fq 'network survivor connected' "$ev/permanent-failure.txt"; then result PASS 'invalid security network skipped; survivor operational'; else result PENDING 'invalid security network skipped; survivor operational'; fi
 marker rexx-commands.txt 'M9.2 STATUS RC=0' 'ARexx STATUS'
 marker rexx-commands.txt 'M9.2 JOIN RC=0' 'ARexx JOIN'
 marker rexx-commands.txt 'M9.2 MSG RC=0' 'ARexx MSG'
