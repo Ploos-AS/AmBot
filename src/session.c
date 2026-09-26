@@ -78,6 +78,7 @@ static int handle_line(const char *line, void *userdata)
         if (ambot_event_queue_push(context->events, &event) != 0)
             printf("AmBot: event queue full; dropped=%lu\n", context->events->dropped);
     }
+    return 0;
 }
 
 static void process_reload(struct ambot_control *control,
