@@ -1,0 +1,13 @@
+# AmBNC configuration template for the M9.2 delegated TLS phase.
+# HOST_IP is the host running run-tls-transport.sh.
+
+[NETWORK ambot-tls-gateway]
+HOST=HOST_IP
+PORT=17669
+NICK=AmBNCBotTLSQ
+USER=ambnc
+LISTEN_PORT=16669
+BACKLOG_LINES=8
+CAP=NO
+SASL_PLAIN=NO
+TLS_MODE=PROXY
