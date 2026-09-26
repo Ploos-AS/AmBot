@@ -30,7 +30,7 @@ if [[ -f "$fixture" ]] && grep -Fq '"event": "sasl_fail"' "$fixture" && grep -Fq
 event join alpha 'alpha channel join'
 event join beta 'beta channel join'
 event forced_drop alpha 'alpha deterministic disconnect'
-if [[ -f "$fixture" ]] && grep -F '"event": "connected"' "$fixture" | grep -F '"network": "alpha"' | grep -Fq '"connection": 2'; then result PASS 'alpha reconnect'; else result PENDING 'alpha reconnect'; fi
+if [[ -f "$fixture" ]] && grep -F '"event": "registered"' "$fixture" | grep -F '"network": "alpha"' | grep -Fq '"connection": 2' && grep -F '"event": "pong"' "$fixture" | grep -F '"network": "alpha"' | grep -Fq '"connection": 2'; then result PASS 'alpha reconnect registered and live'; else result PENDING 'alpha reconnect registered and live'; fi
 event isolation_probe beta 'beta remains live during alpha fault'
 marker rexx-commands.txt 'M9.2 STATUS RC=0' 'ARexx STATUS'
 marker rexx-commands.txt 'M9.2 JOIN RC=0' 'ARexx JOIN'
