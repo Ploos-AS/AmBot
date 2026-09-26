@@ -20,7 +20,7 @@ from static inspection or the M9.1 AROS run.
 | AmBNC-backed network | PENDING | Record AmBot + AmBNC commits and fixture transcript |
 | CAP LS 302 negotiation | PENDING | |
 | SASL PLAIN success | PENDING | |
-| SASL failure remains bounded/clean | PENDING | |
+| SASL failure remains bounded/clean | PENDING | sasl-fail receives 904 and is disabled; survivor remains active |
 | TLS=UPSTREAM via external proxy | PENDING | Record delegated AmBNC path and proxy TLS version |
 | clean QUIT/shutdown | PENDING | |
 
