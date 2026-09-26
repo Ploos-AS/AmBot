@@ -17,11 +17,11 @@ from static inspection or the M9.1 AROS run.
 | hook failure isolation | PENDING | |
 | config reload | PENDING | |
 | two simultaneous networks | PENDING | |
-| AmBNC-backed network | PENDING | |
+| AmBNC-backed network | PENDING | Record AmBot + AmBNC commits and fixture transcript |
 | CAP LS 302 negotiation | PENDING | |
 | SASL PLAIN success | PENDING | |
 | SASL failure remains bounded/clean | PENDING | |
-| TLS=UPSTREAM via external proxy | PENDING | |
+| TLS=UPSTREAM via external proxy | PENDING | Record delegated AmBNC path and proxy TLS version |
 | clean QUIT/shutdown | PENDING | |
 
 ## Required metadata
