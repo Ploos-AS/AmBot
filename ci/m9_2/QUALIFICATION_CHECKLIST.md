@@ -39,3 +39,6 @@ from static inspection or the M9.1 AROS run.
 - Tester:
 
 Licensed AmigaOS/Kickstart material and credentials must remain outside Git.
+
+| real AmBNC plaintext path | PENDING | ambnc-plain.txt shows via-ambnc connected; AmBot/AmBNC commits recorded |
+| real AmBNC delegated TLS path | PENDING | ambnc-tls.txt + TLS proxy version + tls_irc_registered + tls_irc_pong |
