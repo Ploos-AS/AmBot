@@ -17,6 +17,9 @@
 #include "rexx.h"
 
 #define AMBOT_MULTINET_RECV_BUFFER 512
+#define CONNECT_OK 0
+#define CONNECT_RETRY -1
+#define CONNECT_PERMANENT -2
 
 struct network_runtime {
     struct ambot_network_config *config;
@@ -88,11 +91,11 @@ static int connect_runtime(struct network_runtime *runtime,
 
     if (ambot_network_validate_security(config) != 0) {
         printf("AmBot: invalid security profile for network %s\n", config->name);
-        return -1;
+        return CONNECT_PERMANENT;
     }
 
     runtime->sock = ambot_net_connect_ipv4(host, port);
-    if (runtime->sock < 0) return -1;
+    if (runtime->sock < 0) return CONNECT_RETRY;
 
     ambot_irc_framer_init(&runtime->framer);
     ambot_event_queue_init(&runtime->events);
@@ -112,7 +115,7 @@ static int connect_runtime(struct network_runtime *runtime,
                                     config->pass[0] != '\0' ? config->pass : 0) != 0) {
         ambot_net_close_socket(runtime->sock);
         runtime->sock = -1;
-        return -1;
+        return CONNECT_RETRY;
     }
 
     for (i = 0; i < config->channel_count; ++i) {
@@ -130,7 +133,7 @@ static int connect_runtime(struct network_runtime *runtime,
            config->cap_enabled ? "on" : "off",
            config->sasl_plain ? "PLAIN" : "off",
            config->tls_upstream ? "upstream" : "off");
-    return 0;
+    return CONNECT_OK;
 }
 
 int ambot_multinet_run(struct ambot_networks *networks,
@@ -147,13 +150,19 @@ int ambot_multinet_run(struct ambot_networks *networks,
     for (i = 0; i < networks->count; ++i) {
         runtimes[i].config = &networks->items[i];
         runtimes[i].sock = -1;
-        if (connect_runtime(&runtimes[i], rexx, control) == 0) {
-            ++active;
-        } else {
-            runtimes[i].retry_enabled = 1;
-            runtimes[i].retry_wait = 1;
-            runtimes[i].retry_at = time(0) + 1;
-            ++retrying;
+        {
+            int connect_result = connect_runtime(&runtimes[i], rexx, control);
+            if (connect_result == CONNECT_OK) {
+                ++active;
+            } else if (connect_result == CONNECT_RETRY) {
+                runtimes[i].retry_enabled = 1;
+                runtimes[i].retry_wait = 1;
+                runtimes[i].retry_at = time(0) + 1;
+                ++retrying;
+            } else {
+                printf("AmBot: network %s permanently disabled by configuration\n",
+                       networks->items[i].name);
+            }
         }
         sockets[i] = runtimes[i].sock;
     }
@@ -189,15 +198,22 @@ int ambot_multinet_run(struct ambot_networks *networks,
             time_t now = time(0);
             for (i = 0; i < networks->count; ++i) {
                 if (!runtimes[i].retry_enabled || now < runtimes[i].retry_at) continue;
-                if (connect_runtime(&runtimes[i], rexx, control) == 0) {
-                    runtimes[i].retry_enabled = 0;
-                    sockets[i] = runtimes[i].sock;
-                    ++active;
-                    --retrying;
-                    printf("AmBot: network %s locally reconnected\n",
-                           networks->items[i].name);
-                    if (i == 0) ambot_control_set_socket(control, runtimes[i].sock);
-                } else {
+                {
+                    int connect_result = connect_runtime(&runtimes[i], rexx, control);
+                    if (connect_result == CONNECT_OK) {
+                        runtimes[i].retry_enabled = 0;
+                        sockets[i] = runtimes[i].sock;
+                        ++active;
+                        --retrying;
+                        printf("AmBot: network %s locally reconnected\n",
+                               networks->items[i].name);
+                        if (i == 0) ambot_control_set_socket(control, runtimes[i].sock);
+                    } else if (connect_result == CONNECT_PERMANENT) {
+                        runtimes[i].retry_enabled = 0;
+                        --retrying;
+                        printf("AmBot: network %s permanently disabled during reconnect\n",
+                               networks->items[i].name);
+                    } else {
                     if (runtimes[i].retry_wait < 30) {
                         runtimes[i].retry_wait *= 2;
                         if (runtimes[i].retry_wait > 30) runtimes[i].retry_wait = 30;
@@ -205,6 +221,7 @@ int ambot_multinet_run(struct ambot_networks *networks,
                     runtimes[i].retry_at = now + (time_t)runtimes[i].retry_wait;
                     printf("AmBot: network %s reconnect failed; retry in %u seconds\n",
                            networks->items[i].name, runtimes[i].retry_wait);
+                    }
                 }
             }
         }
