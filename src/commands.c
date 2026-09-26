@@ -17,7 +17,8 @@ struct command_def {
 static const struct command_def commands[] = {
     { "HELP", AMBOT_PERMISSION_USER, "!HELP - list commands" },
     { "STATUS", AMBOT_PERMISSION_USER, "!STATUS - show bot status" },
-    { "VERSION", AMBOT_PERMISSION_USER, "!VERSION - show version" }
+    { "VERSION", AMBOT_PERMISSION_USER, "!VERSION - show version" },
+    { "AI", AMBOT_PERMISSION_USER, "!AI <message> - ask optional BotAI" }
 };
 
 static int nick_equal(const char *a, const char *b)
@@ -98,11 +99,23 @@ void ambot_commands_handle_event(const struct ambot_event *event, void *userdata
     }
 
     if (nick_equal(command->name, "HELP")) {
-        send_reply(context, target, "Commands: !HELP !STATUS !VERSION");
+        send_reply(context, target, "Commands: !HELP !STATUS !VERSION !AI");
     } else if (nick_equal(command->name, "STATUS")) {
         send_reply(context, target,
                    permission == AMBOT_PERMISSION_ADMIN ? "AmBot status: online (admin)" : "AmBot status: online");
     } else if (nick_equal(command->name, "VERSION")) {
         send_reply(context, target, AMBOT_NAME " " AMBOT_VERSION);
+    } else if (nick_equal(command->name, "AI")) {
+        char reply[AMBOT_BOTAI_REPLY_MAX + 1];
+        while (*p == ' ') ++p;
+        if (*p == '\\0') {
+            send_reply(context, target, "Usage: !AI <message>");
+        } else if (context->botai == 0 || !context->botai->compatible) {
+            send_reply(context, target, "BotAI is unavailable");
+        } else if (ambot_botai_chat(context->botai, p, reply, sizeof(reply)) != 0) {
+            send_reply(context, target, "BotAI is temporarily unavailable");
+        } else {
+            send_reply(context, target, reply);
+        }
     }
 }
