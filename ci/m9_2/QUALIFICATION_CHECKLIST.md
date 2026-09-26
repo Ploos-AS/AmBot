@@ -21,6 +21,7 @@ from static inspection or the M9.1 AROS run.
 | CAP LS 302 negotiation | PENDING | |
 | SASL PLAIN success | PENDING | |
 | SASL failure remains bounded/clean | PENDING | sasl-fail receives 904 and is disabled; survivor remains active |
+| invalid security profile isolation | PENDING | dedicated phase shows M7 networks=1 skipped=1 and survivor connected |
 | TLS=UPSTREAM via external proxy | PENDING | Record delegated AmBNC path and proxy TLS version |
 | clean QUIT/shutdown | PENDING | |
 
