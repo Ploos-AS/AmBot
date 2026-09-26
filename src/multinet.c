@@ -176,7 +176,7 @@ int ambot_multinet_run(struct ambot_networks *networks,
         unsigned long wait_mask = ambot_rexx_signal_mask(rexx) | SIGBREAKF_CTRL_C;
         int rc;
 
-        if (active == 0 && retrying == 0) return AMBOT_MULTINET_RECONNECT;
+        if (active == 0 && retrying == 0) return AMBOT_MULTINET_NO_RETRYABLE_NETWORKS;
 
         if (retrying > 0)
             rc = ambot_net_wait_many_timed(sockets, networks->count, wait_mask,
