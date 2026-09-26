@@ -1,5 +1,6 @@
-; Run as a separate visible phase after the normal M9.2 session.
-; Captures console evidence that invalid-security is skipped while survivor runs.
+; Run this in Shell 1, then in Shell 2 run:
+; RX AMBOTQ:M9_2/Permanent-Failure-M9_2.rexx
+; The output file is dedicated evidence for this phase.
 FailAt 20
 CD AMBOTQ:
 Echo "M9.2 permanent failure isolation phase."
