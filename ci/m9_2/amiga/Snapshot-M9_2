@@ -1,0 +1,8 @@
+; Capture non-secret environment evidence after the runtime procedure.
+FailAt 20
+Version >AMBOTQ:evidence/AmigaOS-Version.txt
+List LIBS:bsdsocket.library >AMBOTQ:evidence/bsdsocket-library.txt
+List REXX:AmBot ALL >AMBOTQ:evidence/rexx-hooks.txt
+Echo "OVERALL=PENDING" >AMBOTQ:evidence/Amiga-runtime-status.txt
+Echo "Set PASS only after every required checklist row has evidence." >>AMBOTQ:evidence/Amiga-runtime-status.txt
+Echo "Environment snapshot written to AMBOTQ:evidence/."
