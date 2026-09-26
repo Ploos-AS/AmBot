@@ -8,7 +8,7 @@ if [ -n "${M9_2_SYSTEM_DIR:-}" ] && [ -n "${M9_2_KICKSTART_FILE:-}" ]; then
       -e "s|@KICKSTART_FILE@|$M9_2_KICKSTART_FILE|g" \
       "$ROOT/ci/m9_2/amigaos-template.fs-uae" > "$OUT/AmBot-M9_2.fs-uae"
 fi
-mkdir -p "$OUT/AmBot/M9_2" "$OUT/AmBot/evidence"
+mkdir -p "$OUT/AmBot/M9_2" "$OUT/AmBot/evidence" "$OUT/host"
 cp "$ROOT/AmBot" "$OUT/AmBot/AmBot"
 cp "$ROOT/examples/AmBot.cfg" "$OUT/AmBot/AmBot.cfg"
 cp "$ROOT/examples/AmBot-Multi.cfg" "$OUT/AmBot/AmBot-Multi.cfg"
