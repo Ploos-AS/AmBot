@@ -10,7 +10,7 @@ docker run --rm -v "$PWD:/work" -w /work "$IMAGE" m68k-amigaos-gcc \
   -o AmBot \
   src/main.c src/net.c src/irc.c src/events.c src/commands.c src/operations.c \
   src/rexx.c src/hooks.c src/config.c src/modules.c src/networks.c src/modernirc.c \
-  src/multinet.c src/session.c
+  src/multinet.c src/botai.c src/session.c
 cp AmBot "$OUT_DIR/AmBot"
 file "$OUT_DIR/AmBot" | tee "$OUT_DIR/file.txt"
 sha256sum "$OUT_DIR/AmBot" | tee "$OUT_DIR/AmBot.sha256"
