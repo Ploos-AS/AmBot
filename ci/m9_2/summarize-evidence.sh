@@ -28,6 +28,7 @@ marker rexx-commands.txt 'M9.2 MSG RC=0' 'ARexx MSG'
 marker rexx-commands.txt 'M9.2 NOTICE RC=0' 'ARexx NOTICE'
 marker rexx-commands.txt 'M9.2 RELOAD RC=0' 'ARexx RELOAD request'
 if [[ -s "$ev/hooks.log" ]] && grep -Fq 'M9.2 HOOK' "$ev/hooks.log"; then result PASS 'ON_PRIVMSG hook evidence'; else result PENDING 'ON_PRIVMSG hook evidence'; fi
+if [[ -s "$ev/hooks.log" ]] && grep -Fq 'M9.2 FAILHOOK' "$ev/hooks.log" && grep -Fq 'M9_2_AFTER_FAIL' "$ev/hooks.log"; then result PASS 'hook failure isolation'; else result PENDING 'hook failure isolation'; fi
 if [[ -f "$ev/ambnc.txt" ]] && grep -Fq 'AmBot=' "$ev/ambnc.txt" && grep -Fq 'AmBNC=' "$ev/ambnc.txt"; then result PASS 'AmBNC integration commit evidence'; else result PENDING 'AmBNC integration commit evidence'; fi
 if [[ -f "$proxy" ]] && grep -Fq '"event": "tls_proxy_connected"' "$proxy" && grep -Fq '"tls_version":' "$proxy"; then result PASS 'external TLS transport evidence'; else result PENDING 'external TLS transport evidence'; fi
 
