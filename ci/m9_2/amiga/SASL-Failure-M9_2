@@ -1,0 +1,8 @@
+; Run in Shell 1, then in Shell 2 run:
+; RX AMBOTQ:M9_2/SASL-Failure-M9_2.rexx
+; Expected: sasl-fail receives 904 and is disabled; survivor remains live.
+FailAt 20
+CD AMBOTQ:
+Echo "M9.2 SASL failure isolation phase."
+AmBot -c AMBOTQ:AmBot-SASL-Failure-M9_2.cfg >AMBOTQ:evidence/sasl-failure.txt
+Echo "SASL failure phase exited with RC $RC" >>AMBOTQ:evidence/sasl-failure.txt
