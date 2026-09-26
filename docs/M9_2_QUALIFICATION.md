@@ -75,7 +75,7 @@ PASS.
 Use three visible terminals/shells so host infrastructure and Amiga runtime
 evidence remain distinct.
 
-1. Build and prepare locally:
+1. Run `make preflight-m9_2`, then build and prepare locally:
    `M9_2_SYSTEM_DIR=/licensed/system M9_2_KICKSTART_FILE=/licensed/kick.rom make qualify-m9_2`
 2. On the host, start the deterministic fixture and leave it running:
    `M9_2_HOST_IP=<host-address-visible-to-AmigaOS> make run-m9_2-host`
@@ -88,7 +88,7 @@ evidence remain distinct.
    path described in `AMBNC_INTEGRATION.md`.
 7. Run `AMBOTQ:Snapshot-M9_2`.
 8. Run `RX AMBOTQ:M9_2/Shutdown-M9_2.rexx`.
-9. Stop the host fixture with Ctrl-C and run `make review-m9_2-evidence`.
+9. Stop the host fixture with Ctrl-C, run `make preflight-m9_2`, then run `make review-m9_2-evidence`.
 
 The host runner generates its SASL credential under ignored `build/m9_2/host`
 with restrictive permissions and generates the guest config locally. Never
