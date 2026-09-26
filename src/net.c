@@ -78,11 +78,12 @@ int ambot_net_wait(int sock, unsigned long signal_mask, unsigned long *signals)
     return (ready & 1UL) != 0 ? 1 : 0;
 }
 
-int ambot_net_wait_many(const int *socks,
-                        unsigned int count,
-                        unsigned long signal_mask,
-                        unsigned long *signals,
-                        unsigned long *ready_mask)
+static int wait_many(const int *socks,
+                     unsigned int count,
+                     unsigned long signal_mask,
+                     unsigned long *signals,
+                     unsigned long *ready_mask,
+                     struct timeval *timeout)
 {
     fd_set readfds;
     ULONG signal_bits = (ULONG)signal_mask;
@@ -99,7 +100,7 @@ int ambot_net_wait_many(const int *socks,
         }
     }
 
-    rc = WaitSelect(maxfd + 1, &readfds, 0, 0, 0, &signal_bits);
+    rc = WaitSelect(maxfd + 1, &readfds, 0, 0, timeout, &signal_bits);
     if (signals != 0) *signals = (unsigned long)signal_bits;
     if (rc < 0) return -1;
 
@@ -108,6 +109,28 @@ int ambot_net_wait_many(const int *socks,
 
     if (ready_mask != 0) *ready_mask = ready;
     return rc;
+}
+
+int ambot_net_wait_many(const int *socks,
+                        unsigned int count,
+                        unsigned long signal_mask,
+                        unsigned long *signals,
+                        unsigned long *ready_mask)
+{
+    return wait_many(socks, count, signal_mask, signals, ready_mask, 0);
+}
+
+int ambot_net_wait_many_timed(const int *socks,
+                              unsigned int count,
+                              unsigned long signal_mask,
+                              unsigned long *signals,
+                              unsigned long *ready_mask,
+                              unsigned long timeout_seconds)
+{
+    struct timeval timeout;
+    timeout.tv_sec = (long)timeout_seconds;
+    timeout.tv_usec = 0;
+    return wait_many(socks, count, signal_mask, signals, ready_mask, &timeout);
 }
 
 void ambot_net_close_socket(int sock)
