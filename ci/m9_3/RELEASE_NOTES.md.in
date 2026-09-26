@@ -1,0 +1,27 @@
+# AmBot release notes template
+
+## AmBot @VERSION@
+
+First qualified AmBot release candidate for classic Amiga systems.
+
+### Highlights
+
+- AmigaOS 2.04+ and Motorola 68000 baseline
+- multi-network IRC sessions
+- CAP negotiation and SASL PLAIN
+- ARexx command API and event hooks
+- persistent configuration and ARexx modules
+- optional AmBNC integration and delegated TLS transport
+- bounded per-network failure handling
+- standalone operation; AmBNC and future BotWeb/PBMP remain optional
+
+### Qualification
+
+This release must be built from the exact binary qualified by M9.2. The
+release archive and binary are SHA-256 bound to their manifests and pass the
+M9.3 archive audit before publication.
+
+### Licensing
+
+AmBot software is MIT licensed. No Kickstart ROM, AmigaOS/Workbench material,
+credentials, private keys or local qualification evidence is included.
