@@ -15,7 +15,7 @@ if grep -R -F -n '\\n' ci/m9_2 Makefile --include='*.sh' --include='*.py' --incl
 if [[ -x AmBot || -f AmBot ]]; then r PASS "AmBot build artifact present"; else r PENDING "build AmBot before bundle preparation"; fi
 if [[ -d "$out/AmBot" ]]; then r PASS "M9.2 bundle exists: $out"; else r PENDING "run make qualify-m9_2"; fi
 manifest="$out/AmBot/evidence/MANIFEST.txt"
-if [[ -f "$manifest" ]] && grep -Fq 'format=ambot-m9.2-evidence-v1' "$manifest" && grep -Fq 'binary_sha256=' "$manifest"; then r PASS "evidence manifest present"; else r PENDING "generate M9.2 evidence manifest"; fi
+if [[ -f "$manifest" ]] && grep -Fq 'format=ambot-m9.2-evidence-v2' "$manifest" && grep -Fq 'run_id=' "$manifest" && grep -Fq 'commit=' "$manifest" && grep -Fq 'binary_sha256=' "$manifest"; then r PASS "evidence manifest present"; else r PENDING "generate M9.2 evidence manifest"; fi
 if [[ -f "$out/AmBot/AmBot-M9_2.cfg" ]]; then r PASS "direct runtime config materialized"; else r PENDING "run M9_2_HOST_IP=<host> make run-m9_2-host"; fi
 if [[ -f "$out/AmBot/AmBot-SASL-Failure-M9_2.cfg" ]]; then r PASS "SASL failure config materialized"; else r PENDING "materialize SASL failure phase"; fi
 if [[ -f "$out/AmBot/evidence/sasl-failure.txt" ]] && grep -Fq "network sasl-fail disabled after negotiation failure" "$out/AmBot/evidence/sasl-failure.txt"; then r PASS "SASL failure runtime evidence present"; else r PENDING "run visible SASL failure isolation phase"; fi
