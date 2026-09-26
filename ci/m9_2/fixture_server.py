@@ -20,10 +20,12 @@ class Handler(socketserver.StreamRequestHandler):
     def setup(self):
         super().setup(); self.nick=None; self.user=None
         self.cap=False; self.cap_end=False; self.sasl_ok=not self.server.require_sasl
-        self.registered=False; self.connection_no=0; self.drop_after_pong=False
+        self.registered=False; self.connection_no=0; self.drop_after_pong=False; self.isolation_probe_sent=False
         with LOCK:
             CONNECTIONS[self.server.network]=CONNECTIONS.get(self.server.network,0)+1
             n=CONNECTIONS[self.server.network]
+        self.connection_no=n
+        self.drop_after_pong=self.server.network=="alpha" and n==1
         emit("connected",network=self.server.network,connection=n)
     def send(self,line):
         self.wfile.write((line+"\\r\\n").encode()); self.wfile.flush()
@@ -69,7 +71,8 @@ class Handler(socketserver.StreamRequestHandler):
                 if self.drop_after_pong:
                     emit("forced_drop",network=self.server.network,connection=self.connection_no)
                     return
-                if self.server.network=="beta":
+                if self.server.network=="beta" and not self.isolation_probe_sent:
+                    self.isolation_probe_sent=True
                     self.send("PING :M9_2_BETA_STILL_ALIVE")
                     emit("isolation_probe",network="beta",connection=self.connection_no)
             elif cmd=="JOIN" and self.nick:
