@@ -204,7 +204,8 @@ static void reconnect_delay(unsigned long seconds,
 
 static int run_m7_networks(struct ambot_config *config,
                            struct ambot_rexx *rexx,
-                           struct ambot_control *control)
+                           struct ambot_control *control,
+                           struct ambot_botai *botai)
 {
     while (!ctrl_c_requested() && !control->quit_requested) {
         struct ambot_networks networks;
@@ -220,7 +221,7 @@ static int run_m7_networks(struct ambot_config *config,
         control->reload_requested = 0;
         control->disconnect_requested = 0;
         control->connect_requested = 1;
-        rc = ambot_multinet_run(&networks, rexx, control);
+        rc = ambot_multinet_run(&networks, rexx, control, botai);
 
         if (control->quit_requested || ctrl_c_requested()) break;
         if (rc == AMBOT_MULTINET_RELOAD) {
@@ -335,7 +336,7 @@ int ambot_session_run(const struct ambot_session_config *startup)
     }
 
     if (config.network_count != 0 || config.use_ambnc) {
-        int m7_rc = run_m7_networks(&config, &rexx, &control);
+        int m7_rc = run_m7_networks(&config, &rexx, &control, &botai);
         ambot_control_set_socket(&control, -1);
         ambot_net_close();
         ambot_rexx_close(&rexx);
