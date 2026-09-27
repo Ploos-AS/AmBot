@@ -7,6 +7,13 @@
 #define AMBOT_BOTAI_EXPERT_MAX 31
 #define AMBOT_BOTAI_REPLY_MAX 1024
 #define AMBOT_BOTAI_RESPONSE_MAX 4096
+#define AMBOT_BOTAI_HISTORY_MAX 6
+#define AMBOT_BOTAI_HISTORY_TEXT_MAX 255
+
+struct ambot_botai_history_entry {
+    char role[10];
+    char text[AMBOT_BOTAI_HISTORY_TEXT_MAX + 1];
+};
 
 struct ambot_botai {
     char host[AMBOT_BOTAI_HOST_MAX + 1];
@@ -28,5 +35,11 @@ int ambot_botai_chat(struct ambot_botai *botai,
                      const char *message,
                      char *reply,
                      unsigned int reply_size);
+int ambot_botai_chat_history(struct ambot_botai *botai,
+                             const char *message,
+                             const struct ambot_botai_history_entry *history,
+                             unsigned int history_count,
+                             char *reply,
+                             unsigned int reply_size);
 
 #endif
