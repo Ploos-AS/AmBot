@@ -137,14 +137,24 @@ int ambot_botai_check(struct ambot_botai *botai)
 {
     char response[AMBOT_BOTAI_RESPONSE_MAX];
     const char *body;
+    size_t body_len;
     if (http_request(botai, "GET", "/v1/version", 0, response, sizeof(response)) != 0) {
         if (botai != 0) botai->compatible = 0;
         return -1;
     }
     body = http_body(response);
-    if (body == 0 ||
-        (strcmp(body, "{\"api_version\":\"1.0.0\"}\\n") != 0 &&
-         strcmp(body, "{\"api_version\":\"1.0.0\"}") != 0)) {
+    if (body == 0) {
+        botai->compatible = 0;
+        return -1;
+    }
+    body_len = strlen(body);
+    while (body_len > 0 &&
+           (body[body_len - 1] == '\n' || body[body_len - 1] == '\r' ||
+            body[body_len - 1] == ' ' || body[body_len - 1] == '\t')) {
+        --body_len;
+    }
+    if (body_len != strlen("{\"api_version\":\"1.0.0\"}") ||
+        strncmp(body, "{\"api_version\":\"1.0.0\"}", body_len) != 0) {
         botai->compatible = 0;
         return -1;
     }
