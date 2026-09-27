@@ -6,11 +6,20 @@ static const char *fixture;
 static unsigned int fixture_pos;
 static int mock_connect_result = 7;
 static int mock_wait_result = 1;
+static int mock_overflow;
+static unsigned int mock_overflow_left;
 
 int ambot_net_connect_ipv4(const char *host, unsigned short port) { (void)host; (void)port; fixture_pos=0; return mock_connect_result; }
 int ambot_net_send_all(int sock, const char *data, unsigned int length) { (void)sock; (void)data; (void)length; return 0; }
 int ambot_net_recv(int sock, char *buffer, unsigned int length) {
     unsigned int n=0; (void)sock;
+    if (mock_overflow) {
+        if (mock_overflow_left == 0) return 0;
+        n = length < mock_overflow_left ? length : mock_overflow_left;
+        memset(buffer, 'X', n);
+        mock_overflow_left -= n;
+        return (int)n;
+    }
     while (fixture[fixture_pos] && n<length) buffer[n++]=fixture[fixture_pos++];
     return (int)n;
 }
@@ -56,6 +65,10 @@ int main(void) {
     mock_wait_result=0;
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0 && reply[0]=='\0');
     mock_wait_result=1;
+    mock_overflow=1;
+    mock_overflow_left=AMBOT_BOTAI_RESPONSE_MAX + 64U;
+    CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0 && reply[0]=='\0');
+    mock_overflow=0;
     puts("BotAI host qualification: PASS");
     return 0;
 }
