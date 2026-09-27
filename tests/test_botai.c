@@ -37,6 +37,19 @@ int main(void) {
     CHECK(ambot_botai_configure(&b,"https://127.0.0.1","auto",2)!=0);
     CHECK(ambot_botai_configure(&b,"http://x:0","auto",2)!=0);
     CHECK(ambot_botai_configure(&b,"http://x:65536","auto",2)!=0);
+    {
+        char long_url[AMBOT_BOTAI_HOST_MAX + 32];
+        char long_path[AMBOT_BOTAI_PATH_MAX + 32];
+        unsigned int i;
+        strcpy(long_url, "http://");
+        for (i=7; i+1<sizeof(long_url); ++i) long_url[i]='h';
+        long_url[sizeof(long_url)-1]='\0';
+        CHECK(ambot_botai_configure(&b,long_url,"auto",2)!=0);
+        strcpy(long_path, "http://x/");
+        for (i=9; i+1<sizeof(long_path); ++i) long_path[i]='p';
+        long_path[sizeof(long_path)-1]='\0';
+        CHECK(ambot_botai_configure(&b,long_path,"auto",2)!=0);
+    }
 
     CHECK(ambot_botai_configure(&b,"http://x","auto",2)==0);
     fixture="HTTP/1.0 200 OK\r\n\r\n{\"api_version\":\"1.0.0\"}\n";
@@ -69,6 +82,12 @@ int main(void) {
     mock_overflow_left=AMBOT_BOTAI_RESPONSE_MAX + 64U;
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0 && reply[0]=='\0');
     mock_overflow=0;
+    {
+        char long_message[900];
+        memset(long_message, 'm', sizeof(long_message)-1);
+        long_message[sizeof(long_message)-1]='\0';
+        CHECK(ambot_botai_chat(&b,long_message,reply,sizeof(reply))!=0 && reply[0]=='\0');
+    }
     puts("BotAI host qualification: PASS");
     return 0;
 }
