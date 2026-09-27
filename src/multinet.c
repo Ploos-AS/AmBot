@@ -4,6 +4,7 @@
 
 #include <proto/exec.h>
 
+#include "botai.h"
 #include "commands.h"
 #include "events.h"
 #include "hooks.h"
@@ -82,7 +83,8 @@ static int handle_line(const char *line, void *userdata)
 
 static int connect_runtime(struct network_runtime *runtime,
                            struct ambot_rexx *rexx,
-                           struct ambot_control *control)
+                           struct ambot_control *control,
+                           struct ambot_botai *botai)
 {
     struct ambot_network_config *config = runtime->config;
     const char *host = ambot_network_endpoint_host(config);
@@ -102,6 +104,7 @@ static int connect_runtime(struct network_runtime *runtime,
     runtime->commands.sock = runtime->sock;
     runtime->commands.bot_nick = config->nick;
     runtime->commands.owner_nick = config->owner;
+    runtime->commands.botai = botai;
     ambot_hooks_init(&runtime->hooks, rexx, control);
     runtime->hooks.script_dir = config->hook_dir;
     ambot_modules_init(&runtime->modules);
@@ -138,7 +141,8 @@ static int connect_runtime(struct network_runtime *runtime,
 
 int ambot_multinet_run(struct ambot_networks *networks,
                        struct ambot_rexx *rexx,
-                       struct ambot_control *control)
+                       struct ambot_control *control,
+                       struct ambot_botai *botai)
 {
     struct network_runtime *runtimes = multinet_runtimes;
     int sockets[AMBOT_NETWORKS_MAX];
@@ -151,7 +155,7 @@ int ambot_multinet_run(struct ambot_networks *networks,
         runtimes[i].config = &networks->items[i];
         runtimes[i].sock = -1;
         {
-            int connect_result = connect_runtime(&runtimes[i], rexx, control);
+            int connect_result = connect_runtime(&runtimes[i], rexx, control, botai);
             if (connect_result == CONNECT_OK) {
                 ++active;
             } else if (connect_result == CONNECT_RETRY) {
@@ -199,7 +203,7 @@ int ambot_multinet_run(struct ambot_networks *networks,
             for (i = 0; i < networks->count; ++i) {
                 if (!runtimes[i].retry_enabled || now < runtimes[i].retry_at) continue;
                 {
-                    int connect_result = connect_runtime(&runtimes[i], rexx, control);
+                    int connect_result = connect_runtime(&runtimes[i], rexx, control, botai);
                     if (connect_result == CONNECT_OK) {
                         runtimes[i].retry_enabled = 0;
                         sockets[i] = runtimes[i].sock;
