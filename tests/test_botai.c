@@ -4,8 +4,10 @@
 
 static const char *fixture;
 static unsigned int fixture_pos;
+static int mock_connect_result = 7;
+static int mock_wait_result = 1;
 
-int ambot_net_connect_ipv4(const char *host, unsigned short port) { (void)host; (void)port; fixture_pos=0; return 7; }
+int ambot_net_connect_ipv4(const char *host, unsigned short port) { (void)host; (void)port; fixture_pos=0; return mock_connect_result; }
 int ambot_net_send_all(int sock, const char *data, unsigned int length) { (void)sock; (void)data; (void)length; return 0; }
 int ambot_net_recv(int sock, char *buffer, unsigned int length) {
     unsigned int n=0; (void)sock;
@@ -13,7 +15,7 @@ int ambot_net_recv(int sock, char *buffer, unsigned int length) {
     return (int)n;
 }
 int ambot_net_wait_many_timed(const int *socks,unsigned int count,unsigned long mask,unsigned long *signals,unsigned long *ready,unsigned long timeout) {
-    (void)socks;(void)count;(void)mask;(void)timeout; *signals=0; *ready=1; return 1;
+    (void)socks;(void)count;(void)mask;(void)timeout; *signals=0; *ready=mock_wait_result > 0 ? 1UL : 0UL; return mock_wait_result;
 }
 void ambot_net_close_socket(int sock) { (void)sock; }
 
@@ -48,6 +50,12 @@ int main(void) {
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0);
     fixture="HTTP/1.0 200 OK\r\n\r\n{\"provider\":\"fixture\", \"text\" : \"hello\", \"expert\":\"general\"}\r\n";
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))==0 && strcmp(reply,"hello")==0);
+    mock_connect_result=-1;
+    CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0 && reply[0]=='\0');
+    mock_connect_result=7;
+    mock_wait_result=0;
+    CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0 && reply[0]=='\0');
+    mock_wait_result=1;
     puts("BotAI host qualification: PASS");
     return 0;
 }
