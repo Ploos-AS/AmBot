@@ -181,27 +181,67 @@ static int json_escape(const char *src, char *dst, unsigned int size)
     return 0;
 }
 
+static void skip_json_ws(const char **p)
+{
+    while (**p == ' ' || **p == '\t' || **p == '\r' || **p == '\n') ++*p;
+}
+
+static int parse_json_string(const char **p, char *dst, unsigned int dst_size)
+{
+    unsigned int used = 0;
+    if (**p != '"') return -1;
+    ++*p;
+    while (**p != '\0' && **p != '"') {
+        unsigned char ch = (unsigned char)*(*p)++;
+        if (ch < 32) return -1;
+        if (ch == '\\') {
+            ch = (unsigned char)*(*p)++;
+            if (ch == '\0') return -1;
+            if (ch == 'n' || ch == 'r' || ch == 't') ch = ' ';
+            else if (ch != '"' && ch != '\\' && ch != '/') return -1;
+        }
+        if (dst != 0) {
+            if (used + 1 >= dst_size) return -1;
+            dst[used++] = (char)ch;
+        }
+    }
+    if (**p != '"') return -1;
+    ++*p;
+    if (dst != 0) {
+        if (dst_size == 0) return -1;
+        dst[used] = '\0';
+    }
+    return 0;
+}
+
 static int parse_text_response(const char *body, char *reply, unsigned int reply_size)
 {
-    const char *p;
-    unsigned int used = 0;
-    if (body == 0 || reply == 0 || reply_size == 0 || body[0] != '{') return -1;
-    p = strstr(body, "\"text\":\"");
-    if (p == 0) return -1;
-    p += 8;
-    while (*p != '\0' && *p != '"') {
-        char ch = *p++;
-        if (ch == '\\') {
-            ch = *p++;
-            if (ch != '"' && ch != '\\' && ch != '/' && ch != 'n' && ch != 'r' && ch != 't') return -1;
-            if (ch == 'n' || ch == 'r' || ch == 't') ch = ' ';
+    const char *p = body;
+    char key[32];
+    int have_text = 0;
+    if (body == 0 || reply == 0 || reply_size == 0) return -1;
+    skip_json_ws(&p);
+    if (*p++ != '{') return -1;
+    skip_json_ws(&p);
+    if (*p == '}') return -1;
+    for (;;) {
+        if (parse_json_string(&p, key, sizeof(key)) != 0) return -1;
+        skip_json_ws(&p);
+        if (*p++ != ':') return -1;
+        skip_json_ws(&p);
+        if (strcmp(key, "text") == 0) {
+            if (have_text || parse_json_string(&p, reply, reply_size) != 0 || reply[0] == '\0') return -1;
+            have_text = 1;
+        } else {
+            if (parse_json_string(&p, 0, 0) != 0) return -1;
         }
-        if (used + 1 >= reply_size) return -1;
-        reply[used++] = ch;
+        skip_json_ws(&p);
+        if (*p == '}') { ++p; break; }
+        if (*p++ != ',') return -1;
+        skip_json_ws(&p);
     }
-    if (*p != '"' || used == 0) return -1;
-    reply[used] = '\0';
-    return 0;
+    skip_json_ws(&p);
+    return have_text && *p == '\0' ? 0 : -1;
 }
 
 int ambot_botai_chat(struct ambot_botai *botai, const char *message,
