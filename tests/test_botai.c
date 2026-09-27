@@ -42,11 +42,11 @@ int main(void) {
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0 && reply[0]=='\0');
     fixture="HTTP/1.0 200 OK\r\n\r\n{not-json}\n";
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0);
-    fixture="HTTP/1.0 200 OK\r\n\r\n{garbage \\\"text\\\":\\\"oops\\\"}\n";
+    fixture="HTTP/1.0 200 OK\r\n\r\n{garbage \"text\":\"oops\"}\n";
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0);
-    fixture="HTTP/1.0 200 OK\r\n\r\n{\\\"text\\\":\\\"first\\\",\\\"text\\\":\\\"second\\\"}\n";
+    fixture="HTTP/1.0 200 OK\r\n\r\n{\"text\":\"first\",\"text\":\"second\"}\n";
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))!=0);
-    fixture="HTTP/1.0 200 OK\r\n\r\n{\\\"provider\\\":\\\"fixture\\\", \\\"text\\\" : \\\"hello\\\", \\\"expert\\\":\\\"general\\\"}\r\n";
+    fixture="HTTP/1.0 200 OK\r\n\r\n{\"provider\":\"fixture\", \"text\" : \"hello\", \"expert\":\"general\"}\r\n";
     CHECK(ambot_botai_chat(&b,"hello",reply,sizeof(reply))==0 && strcmp(reply,"hello")==0);
     puts("BotAI host qualification: PASS");
     return 0;
