@@ -66,7 +66,7 @@ int ambot_pbmp_response(const struct ambot_pbmp_state *state,
 
     if (request_has(request, "capabilities.list")) {
         n = snprintf(response, response_size,
-            "{\"pbmp\":1,\"type\":\"response\",\"id\":\"%s\",\"ok\":true,\"result\":{\"methods\":[\"pbmp.info\",\"capabilities.list\",\"bot.info\",\"networks.list\"]}}", id);
+            "{\"pbmp\":1,\"type\":\"response\",\"id\":\"%s\",\"ok\":true,\"result\":{\"capabilities\":[\"pbmp.info\",\"capabilities.list\",\"bot.info\",\"networks.list\"]}}", id);
         return n < 0 || (size_t)n >= response_size ? -1 : 0;
     }
 
