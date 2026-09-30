@@ -1,0 +1,52 @@
+name: PBMP conformance
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pbmp-conformance:
+    runs-on: ubuntu-latest
+    env:
+      AMBOT_PBMP_SOCKET: /tmp/ambot.pbmp.sock
+    steps:
+      - name: Checkout AmBot
+        uses: actions/checkout@v4
+      - name: Unit checks
+        run: make check-pbmp
+      - name: Build PBMP qualification endpoint
+        run: |
+          cc -std=c11 -Wall -Wextra -Werror -Iinclude \
+            ci/pbmp/qualification_server.c src/pbmp.c \
+            -o /tmp/ambot-pbmp-qualification
+      - name: Start PBMP qualification endpoint
+        run: |
+          /tmp/ambot-pbmp-qualification &
+          for i in {1..100}; do
+            test -S "$AMBOT_PBMP_SOCKET" && exit 0
+            sleep 0.1
+          done
+          exit 1
+      - name: Check out PBMP qualification suite
+        uses: actions/checkout@v4
+        with:
+          repository: Ploos-AS/PBMP
+          ref: v1.0.0
+          path: .pbmp-suite
+      - name: Qualify AmBot against PBMP/1
+        run: |
+          python3 .pbmp-suite/tools/qualify_endpoint.py \
+            --socket "$AMBOT_PBMP_SOCKET" \
+            --implementation-name ambot \
+            --implementation-version "$GITHUB_SHA" \
+            --output ambot-pbmp-conformance.json
+          python3 -c 'import json; r=json.load(open("ambot-pbmp-conformance.json")); assert r["result"] == "pass"'
+      - name: Upload PBMP conformance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ambot-pbmp-v1.0.0-conformance
+          path: ambot-pbmp-conformance.json
+          if-no-files-found: error
