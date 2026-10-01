@@ -65,6 +65,9 @@ M1 uses plain TCP. TLS/SASL are intentionally deferred to the modern IRC milesto
 4. Route IRC events through a shared dispatcher so built-ins and ARexx scripts see the same event model.
 5. Prefer bounded memory structures suitable for classic hardware.
 6. Keep AmBot interoperable with AmBNC without requiring it.
-7. **Standalone-first:** AmBot MUST remain a fully functional IRC bot without PBMP, BotWeb, BotAI, AmBNC, or any other external Ploos service. These integrations are optional adapters/features only; their absence, failure, or removal MUST NOT prevent normal IRC operation or make core bot functionality depend on an external control plane or AI service.
+7. **Standalone-first:** AmBot MUST remain a fully functional IRC bot without PBMP, BotWeb, BotAI, BotLogic, AmBNC, or any other external Ploos service. PBMP, BotWeb, BotAI, BotLogic and AmBNC are optional adapters/features only; their absence, failure, or removal MUST NOT prevent normal IRC operation or make core bot functionality depend on an external control plane or AI service.
+
+
+Standalone qualification requires the bot to build and pass its core test suite with PBMP, BotWeb, BotAI and BotLogic disabled. None of these integrations may become a required build/runtime dependency.
 
 See `ROADMAP.md`, `docs/ARCHITECTURE.md` and `docs/M1.md` for the planned progression and M1 details.
