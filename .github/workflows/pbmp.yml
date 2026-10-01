@@ -8,6 +8,25 @@ permissions:
   contents: read
 
 jobs:
+  standalone-contract:
+    runs-on: ubuntu-latest
+    env:
+      AMBOT_PBMP_SOCKET: ""
+      AMBOT_BOTWEB_URL: ""
+      AMBOT_BOTAI_URL: ""
+      AMBOT_BOTLOGIC_URL: ""
+      AMBOT_AMBNC_ENDPOINT: ""
+    steps:
+      - uses: actions/checkout@v4
+      - name: Qualify standalone core with all integrations disabled
+        run: |
+          test -z "$AMBOT_PBMP_SOCKET"
+          test -z "$AMBOT_BOTWEB_URL"
+          test -z "$AMBOT_BOTAI_URL"
+          test -z "$AMBOT_BOTLOGIC_URL"
+          test -z "$AMBOT_AMBNC_ENDPOINT"
+          make check
+
   pbmp-conformance:
     runs-on: ubuntu-latest
     env:
